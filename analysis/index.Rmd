@@ -8,6 +8,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-- [Data Preprocessing](datapreproces.html)
+- [Data Preprocessing](datapreprocess.html)
 - [Exploratory Analysis to construct ML datasets](exploratory.html)
 
