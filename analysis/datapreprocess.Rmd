@@ -1,0 +1,215 @@
+---
+title: "Data Preprocessing"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+The TERRA season 4 data comes as a large R data frame. There is a lot to sort out about the data prior to exploration.
+
+```{r message=FALSE}
+library(tidyverse)
+load("data/raw/season4date.Rdata")
+seas4 <- season_4_date
+
+glimpse(seas4)
+```
+
+We see that the data is provided in "long" format, with each row corresponding to one measurement of one variable at one time point..
+
+The key variables here are `trait`, which indicates the variable being measured, with its value reported by `mean`, and the associated date/time at which it is recorded indicated by `trans_date`.
+
+There are several other variables and a good start would be to figure out which ones we really need, so that we are working with a leaner dataset.
+
+## Pruning variables
+
+Many variables have only one or a handful of unique values.
+
+```{r}
+n_unique <- sort(sapply(seas4, function(a) length(unique(a))))
+n_unique
+```
+
+Focusing on the variables with only one unique value:
+
+```{r}
+select(seas4, one_of(names(n_unique)[n_unique == 1])) %>%
+  head(1) %>%
+  t()
+```
+
+Now that we have noted what these variables contain, we can remove them from the data. We'll build up a list of variables to remove.
+
+```{r}
+ignore_vars <- names(n_unique)[n_unique == 1]
+```
+
+The access level and citation variables also look like they can be ignored. If for some reason later we determine they are needed, we can add them back in.
+
+```{r}
+unique(seas4$access_level)
+unique(seas4$citation_id)
+unique(seas4$author)
+unique(seas4$citation_year)
+ignore_vars <- c(ignore_vars,
+  "access_level", "citation_id", "author", "citation_year")
+```
+
+There are some redundant date variables.
+
+```{r}
+head(seas4$trans_date)
+head(seas4$date)
+head(seas4$time)
+all(as.integer(format(seas4$trans_date, "%m")) == seas4$month)
+```
+
+The `trans_date` variable contains all the information found in `date`, `time`, and `month`, so we can remove those.
+
+```{r}
+ignore_vars <- c(ignore_vars, "date", "time", "month")
+```
+
+The `view_url` and `edit_url` variables are easy to reconstruct with the `id` variable so they can be removed.
+
+```{r}
+head(seas4$id)
+head(seas4$view_url)
+head(seas4$edit_url)
+
+ignore_vars <- c(ignore_vars, "view_url", "edit_url")
+```
+
+There are a number of groups of variables that have redundancies that we can handle by creating lookup tables.
+
+
+```{r}
+traits <- select(seas4, trait, trait_description) %>% distinct()
+treatments <- select(seas4, treatment_id, treatment) %>% distinct()
+cultivars <- select(seas4, cultivar, cultivar_id) %>% distinct()
+sites <- select(seas4, site_id, sitename, lat, lon) %>% distinct()
+# pull out range, column, and direction from sites as new variables
+tmp <- gsub("MAC Field Scanner Season 4 ", "", sites$sitename)
+sites$range <- as.integer(gsub("Range ([0-9]+).*", "\\1", tmp))
+sites$column <- as.integer(gsub(".*Column ([0-9]+).*", "\\1", tmp))
+sites$dir <- trimws(gsub(".*Column [0-9]+(.*)", "\\1", tmp))
+
+
+traits
+treatments
+cultivars
+sites
+```
+
+With these lookup tables, we can remove some of the redundant variables:
+
+```{r}
+ignore_vars <- c(ignore_vars,
+  "trait_description", "treatment", "cultivar_id", "site_id")
+```
+
+We now have `r length(ignore_vars)` variables we can remove from the data:
+
+```{r}
+ignore_vars
+```
+
+Let's remove them.
+
+```{r}
+seas4 <- select(seas4, one_of(setdiff(names(seas4), ignore_vars)))
+```
+
+## Duplicates
+
+There are duplicates present in the data that need to be removed. First, there are several `id`s that appear more than once in the data.
+
+```{r}
+seas4 %>%
+  group_by(id) %>%
+  tally() %>%
+  filter(n > 1) %>%
+  arrange(-n)
+```
+
+Let's look at one of these:
+
+```{r}
+filter(seas4, id == 6001938532)
+filter(seas4, id == 6001938532) %>% distinct()
+```
+
+It is the exact same data for every duplicate entry. I'm not sure why these are in the data, but it makes sense to only keep distinct rows of the data:
+
+```{r echo=FALSE}
+nr_orig <- nrow(seas4)
+```
+
+```{r}
+seas4 <- distinct(seas4)
+seas4
+```
+
+We now have `r nrow(seas4)` rows of data vs. the original `r nr_orig` rows.
+
+Even after this, there are more duplicates, where there are repeats of rows if the `id` variable is ignored.
+
+For example, for one particular site, trait, and date:
+
+```{r}
+tmp <- seas4 %>%
+  mutate(date = as.Date(trans_date)) %>%
+  filter(sitename == "MAC Field Scanner Season 4 Range 10 Column 1" &
+    date == "2017-07-18" &
+    trait == "surface_temperature")
+
+distinct(tmp)
+```
+
+The `id` is the only variable that is different for each row:
+
+```{r}
+tmp %>% select(-id) %>% distinct()
+```
+
+I don't know why there would be a different `id` for sets of measurements where every other variable has the same value, but it makes sense to remove these from the data as well.
+
+```{r echo=FALSE}
+nr_orig2 <- nrow(seas4)
+```
+
+```{r}
+seas4 <- seas4 %>%
+  group_by_at(setdiff(names(seas4), "id")) %>%
+  filter(row_number() == 1) %>%
+  ungroup()
+
+seas4
+```
+
+We now have `r nrow(seas4)` observations.
+
+## Sites
+
+One more transformation to apply to the data to get it ready for exploration is to look at the `sitename`.
+
+There are many `sitename` values that are identical except for ending with a "E" and "W". For exmaple
+
+```{r}
+filter(sites,
+  grepl("MAC Field Scanner Season 4 Range 36 Column 2", sitename))
+```
+
+These are important, and we will look at them in more detail in the [exploratory](exploratory.html) section, but it is also useful to have another variable with these values removed, since they represent different measurements on the same cultivar.
+
+```{r}
+seas4 <- mutate(seas4, sitename2 = gsub(" (E|W)$", "", sitename))
+```
+
+## Saving the Data
+
+We will now save this data for use in our other analyses:
+
+```{r}
+save(seas4, traits, treatments, cultivars, sites, file = "data/seas4.Rdata")
+```

@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Exploratory Analysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">terra</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="datapreprocess.html">Preprocessing</a>
+</li>
+<li>
+  <a href="exploratory.html">Exploratory</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Exploratory Analysis</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-01-28
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>terra2/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200123code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200123)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200123code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200123)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongd60e687"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> d60e687 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongd60e687" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    data/.DS_Store
+
+Untracked files:
+    Untracked:  _ignore/
+    Untracked:  analysis/datapreprocess.Rmd
+    Untracked:  analysis/exploratory.Rmd
+    Untracked:  analysis/style.css
+    Untracked:  code/code.R
+    Untracked:  code/dataprep.R
+    Untracked:  data/mldat_july1.csv
+    Untracked:  data/mldat_june1.csv
+    Untracked:  data/raw/
+    Untracked:  data/seas4.Rdata
+
+Unstaged changes:
+    Modified:   analysis/_site.yml
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<p>In <a href="datapreprocess.html">preprocessing</a>, we cleaned up the raw TERRA data. It is worthwhile to scan that section if you haven’t. We’ll now do some exploration of the resulting dataset.</p>
+<div id="goal" class="section level2">
+<h2>Goal</h2>
+<p>The underlying goal behind the exploration is to understand the structure of the data so that we can better construct training data for our ML models.</p>
+<p>The scientific goal is to predict final plant biomass, as measured by <code>aboveground_dry_biomass</code>, for each plant, using all the other traits available. We want to understand all of the variables to be able to know how to construct the appropriate dataset as input for our ML models. The challenge is that the traits measured for each plant are measured at different times, so at any given time point, we want to be able to construct a dataset with features that best represent the state of the measurements at that time.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">load</span>(<span class="st">&quot;data/seas4.Rdata&quot;</span>)</a></code></pre></div>
+</div>
+<div id="number-of-measurements" class="section level2">
+<h2>Number of measurements</h2>
+<p>With this data, we are dealing with several types of measurements taken at different times and from different locations. To get a feel for how many times variables are measured:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by</span>(trait) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="st">  </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="st">  </span><span class="kw">arrange</span>(<span class="op">-</span>n)</a></code></pre></div>
+<pre><code># A tibble: 77 x 2
+   trait                        n
+   &lt;chr&gt;                    &lt;int&gt;
+ 1 surface_temperature      34978
+ 2 canopy_height            23969
+ 3 leaf_angle_mean          21702
+ 4 leaf_angle_chi           21701
+ 5 leaf_angle_alpha         21699
+ 6 leaf_angle_beta          21699
+ 7 leaf_desiccation_present  4179
+ 8 leaf_temperature          3701
+ 9 lodging_present           3477
+10 panicle_surface_area      2465
+# … with 67 more rows</code></pre>
+<p>There’s a good amount of variability. The number of times a variable is measured depends on the spatial and temporal density of measurements, so we will look into this further.</p>
+</div>
+<div id="sites" class="section level2">
+<h2>Sites</h2>
+<p>It’s first good to have a better understanding of the site variables. There are 2247 unique sites, which we will also refer to as “grid cells”:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">head</span>(<span class="kw">sort</span>(<span class="kw">unique</span>(seas4<span class="op">$</span>sitename)))</a></code></pre></div>
+<pre><code>[1] &quot;MAC Field Scanner Season 4 Range 10 Column 1&quot;   
+[2] &quot;MAC Field Scanner Season 4 Range 10 Column 10&quot;  
+[3] &quot;MAC Field Scanner Season 4 Range 10 Column 10 E&quot;
+[4] &quot;MAC Field Scanner Season 4 Range 10 Column 10 W&quot;
+[5] &quot;MAC Field Scanner Season 4 Range 10 Column 11&quot;  
+[6] &quot;MAC Field Scanner Season 4 Range 10 Column 11 E&quot;</code></pre>
+<p>As can be seen, sites are on a grid indicated by a range (row) and column. There is also sometimes an appended “E” and “W” to a site name, which we are interpreting as a “direction” at which the measurement was made on that particular grid cell.</p>
+<p>Using the provided latitude and longitude, we can get a feel for the layout of the field.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">sites2 &lt;-<span class="st"> </span>sites <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">size =</span> <span class="kw">ifelse</span>(dir <span class="op">==</span><span class="st"> &quot;&quot;</span>, <span class="dv">4</span>, <span class="dv">2</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="st">  </span><span class="kw">arrange</span>(dir)</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="kw">ggplot</span>(sites2, <span class="kw">aes</span>(lon, lat, <span class="dt">color =</span> dir)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">alpha =</span> <span class="fl">0.9</span>, <span class="dt">size =</span> sites2<span class="op">$</span>size) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="st">  </span>ggthemes<span class="op">::</span><span class="kw">scale_color_tableau</span>(<span class="dt">palette =</span> <span class="st">&quot;Tableau 10&quot;</span>,</a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">    <span class="dt">name =</span> <span class="st">&quot;site suffix&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8"><span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="st">  </span><span class="kw">coord_fixed</span>(<span class="dt">ratio =</span> <span class="fl">0.3620315</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-4-1.png" width="508.8" style="display: block; margin: auto;" /></p>
+<p>As can be seen, the “E” and “W” sitenames do appear to be measured directly to the east and west of the grid cells.</p>
+<p>It is worth noting that each “cell” contains one variety of sorghum. Thus we can think of the “E/W” measurements, e.g. “Range 10 Column 10”, “Range 10 Column 10 E”, “Range 10 Column 10 W” as all measuring the same outcome. For this reason, we will construct ML datasets that have a set of features for each cell, without respect for the “E/W”, where the “E/W” measurements will either be accounted for as new features, or lumped into the non-directional measurement, if applicable.</p>
+<p>Which variables have E/W measurements?</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">filter</span>(seas4, <span class="kw">grepl</span>(<span class="st">&quot; (E|W)$&quot;</span>, sitename)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="st">  </span><span class="kw">pull</span>(trait) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="st">  </span><span class="kw">unique</span>()</a></code></pre></div>
+<pre><code> [1] &quot;leaf_temperature&quot;                 &quot;planter_seed_drop&quot;               
+ [3] &quot;stand_count&quot;                      &quot;panicle_height&quot;                  
+ [5] &quot;seedling_emergence_rate&quot;          &quot;stalk_diameter_fixed_height&quot;     
+ [7] &quot;stalk_diameter_minor_axis&quot;        &quot;stalk_diameter_major_axis&quot;       
+ [9] &quot;stem_elongated_internodes_number&quot; &quot;leaf_width&quot;                      
+[11] &quot;canopy_cover&quot;                     &quot;emergence_count&quot;                 
+[13] &quot;canopy_height&quot;                    &quot;leaf_length&quot;                     
+[15] &quot;plant_basal_tiller_number&quot;       </code></pre>
+</div>
+<div id="spatial-density-of-measurements" class="section level2">
+<h2>Spatial Density of Measurements</h2>
+<p>Now let’s get a feel for how many times each variable was measured at each grid cell. The code below counts, for each variable, what percentage of measurements come from each grid cell as well as how many grid cells a measurement is present in.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">trait_site_freq &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by</span>(trait, sitename, lat, lon) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="st">  </span><span class="kw">group_by</span>(trait) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="st">  </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb9-7" data-line-number="7">    <span class="dt">pct =</span> n <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(n),</a>
+<a class="sourceLine" id="cb9-8" data-line-number="8">    <span class="dt">npoints =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-10" data-line-number="10"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">trait2 =</span> <span class="kw">fct_reorder</span>(trait, npoints, mean))</a></code></pre></div>
+<p>Before we plot these, we’ll create a measurement “pattern” variable that assigns a spatial pattern number to each sampling pattern that we will see in the visualizations.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">trait_grid_patterns &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">  <span class="dt">trait2 =</span> <span class="kw">factor</span>(<span class="kw">levels</span>(trait_site_freq<span class="op">$</span>trait2),</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">    <span class="kw">levels</span>(trait_site_freq<span class="op">$</span>trait2)),</a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">  <span class="dt">pattern =</span> <span class="kw">c</span>(<span class="kw">rep</span>(<span class="dv">1</span>, <span class="dv">44</span>), <span class="kw">rep</span>(<span class="dv">2</span>, <span class="dv">8</span>), <span class="kw">rep</span>(<span class="dv">3</span>, <span class="dv">6</span>), <span class="kw">rep</span>(<span class="dv">4</span>, <span class="dv">4</span>),</a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">    <span class="kw">rep</span>(<span class="dv">5</span>, <span class="dv">2</span>), <span class="kw">rep</span>(<span class="dv">6</span>, <span class="dv">10</span>), <span class="kw">rep</span>(<span class="dv">7</span>, <span class="dv">2</span>), <span class="dv">7</span>),</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6">  <span class="dt">lat =</span> <span class="kw">max</span>(trait_site_freq<span class="op">$</span>lat),</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">  <span class="dt">lon =</span> <span class="kw">max</span>(trait_site_freq<span class="op">$</span>lon)</a>
+<a class="sourceLine" id="cb10-8" data-line-number="8">)</a></code></pre></div>
+<p>Let’s plot grids for the 39 (out of 77) most sparsely spatially measured trait variables:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">d1 &lt;-<span class="st"> </span><span class="kw">filter</span>(trait_site_freq, trait2 <span class="op">%in%</span><span class="st"> </span><span class="kw">levels</span>(trait2)[<span class="dv">1</span><span class="op">:</span><span class="dv">39</span>])</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">d2 &lt;-<span class="st"> </span><span class="kw">filter</span>(trait_grid_patterns, trait2 <span class="op">%in%</span><span class="st"> </span><span class="kw">levels</span>(trait2)[<span class="dv">1</span><span class="op">:</span><span class="dv">39</span>])</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="kw">ggplot</span>(d1, <span class="kw">aes</span>(lon, lat, <span class="dt">size =</span> pct)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">alpha =</span> <span class="fl">0.7</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label =</span> pattern, <span class="dt">size =</span> <span class="ot">NULL</span>), <span class="dt">data =</span> d2) <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="st">  </span><span class="kw">theme_bw</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-7" data-line-number="7"><span class="st">  </span><span class="kw">scale_size_continuous</span>(<span class="dt">guide =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-8" data-line-number="8"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>trait2, <span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">13</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-9" data-line-number="9"><span class="st">  </span><span class="kw">coord_fixed</span>(<span class="dt">ratio =</span> <span class="fl">0.3620315</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb11-10" data-line-number="10"><span class="st">  </span><span class="kw">theme</span>(</a>
+<a class="sourceLine" id="cb11-11" data-line-number="11">    <span class="dt">axis.text.x =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb11-12" data-line-number="12">    <span class="dt">axis.text.y =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb11-13" data-line-number="13">    <span class="dt">strip.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">6</span>))</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-9-1.png" width="1440" style="display: block; margin: auto;" /></p>
+<p>All of these have pretty much the same pattern, all labeled as “pattern 1”.</p>
+<p>Let’s look at the rest of the variables:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">d1 &lt;-<span class="st"> </span><span class="kw">filter</span>(trait_site_freq, trait2 <span class="op">%in%</span><span class="st"> </span><span class="kw">levels</span>(trait2)[<span class="dv">40</span><span class="op">:</span><span class="dv">77</span>])</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">d2 &lt;-<span class="st"> </span><span class="kw">filter</span>(trait_grid_patterns, trait2 <span class="op">%in%</span><span class="st"> </span><span class="kw">levels</span>(trait2)[<span class="dv">40</span><span class="op">:</span><span class="dv">77</span>])</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3"><span class="kw">ggplot</span>(d1, <span class="kw">aes</span>(lon, lat, <span class="dt">size =</span> pct)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">alpha =</span> <span class="fl">0.7</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-5" data-line-number="5"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label =</span> pattern, <span class="dt">size =</span> <span class="ot">NULL</span>), <span class="dt">data =</span> d2) <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-6" data-line-number="6"><span class="st">  </span><span class="kw">theme_bw</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-7" data-line-number="7"><span class="st">  </span><span class="kw">scale_size_continuous</span>(<span class="dt">guide =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-8" data-line-number="8"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>trait2, <span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">13</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-9" data-line-number="9"><span class="st">  </span><span class="kw">coord_fixed</span>(<span class="dt">ratio =</span> <span class="fl">0.3620315</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb12-10" data-line-number="10"><span class="st">  </span><span class="kw">theme</span>(</a>
+<a class="sourceLine" id="cb12-11" data-line-number="11">    <span class="dt">axis.text.x =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb12-12" data-line-number="12">    <span class="dt">axis.text.y =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb12-13" data-line-number="13">    <span class="dt">strip.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">6</span>))</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-10-1.png" width="1440" style="display: block; margin: auto;" /></p>
+<p>The first 5 variables have the same “pattern 1” as the others that we saw. Then we see about 6 other patterns of spatial measurement for the rest of the variables, as labeled in the top right corner of each panel.</p>
+<p>It is nice to see that the target variable we are interested in, <code>aboveground_dry_biomass</code>, has good spatial measurement. This plot will be good to refer to as we consider other variables we want to use to predict plant biomass, since each grid cell contains a plant and therefore we would like to have predictor measurements for each cell we are trying to predict.</p>
+</div>
+<div id="temporal-span-of-measurements" class="section level2">
+<h2>Temporal Span of Measurements</h2>
+<p>It’s also useful to understand how frequently (and at what point in time) variables are measured.</p>
+<p>Here we construct a data frame that contains the first and last time each variable is measured, as well as how many unique timestamps the variable is measured at.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">nmax_per_site &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by</span>(trait, sitename) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-3" data-line-number="3"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">length</span>(<span class="kw">unique</span>(trans_date))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="st">  </span><span class="kw">group_by</span>(trait) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-5" data-line-number="5"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">max_n =</span> <span class="kw">max</span>(n)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-6" data-line-number="6"><span class="st">  </span><span class="kw">arrange</span>(max_n)</a>
+<a class="sourceLine" id="cb13-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb13-8" data-line-number="8">time_span &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-9" data-line-number="9"><span class="st">  </span><span class="kw">group_by</span>(trait) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-10" data-line-number="10"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb13-11" data-line-number="11">    <span class="dt">start_date =</span> <span class="kw">min</span>(trans_date),</a>
+<a class="sourceLine" id="cb13-12" data-line-number="12">    <span class="dt">end_date =</span> <span class="kw">max</span>(trans_date),</a>
+<a class="sourceLine" id="cb13-13" data-line-number="13">    <span class="dt">n =</span> <span class="kw">length</span>(<span class="kw">unique</span>(trans_date))</a>
+<a class="sourceLine" id="cb13-14" data-line-number="14">  ) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-15" data-line-number="15"><span class="st">  </span><span class="kw">arrange</span>(end_date) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-16" data-line-number="16"><span class="st">  </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb13-17" data-line-number="17">    <span class="dt">color =</span> <span class="kw">as.character</span>(start_date),</a>
+<a class="sourceLine" id="cb13-18" data-line-number="18">    <span class="dt">trait =</span> <span class="kw">fct_reorder2</span>(trait, start_date, end_date, <span class="cf">function</span>(x, y) {</a>
+<a class="sourceLine" id="cb13-19" data-line-number="19">      seas4 &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">min</span>(x))</a>
+<a class="sourceLine" id="cb13-20" data-line-number="20">      yy &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">max</span>(y))</a>
+<a class="sourceLine" id="cb13-21" data-line-number="21">      seas4<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>yy <span class="op">-</span><span class="st"> </span>seas4</a>
+<a class="sourceLine" id="cb13-22" data-line-number="22">    })</a>
+<a class="sourceLine" id="cb13-23" data-line-number="23">  )</a></code></pre></div>
+<p>Let’s look at a visual of this:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">trait_grid_patterns<span class="op">$</span>trait &lt;-<span class="st"> </span><span class="kw">factor</span>(trait_grid_patterns<span class="op">$</span>trait2,</a>
+<a class="sourceLine" id="cb14-2" data-line-number="2">  <span class="dt">levels =</span> <span class="kw">levels</span>(time_span<span class="op">$</span>trait))</a>
+<a class="sourceLine" id="cb14-3" data-line-number="3">nmax_per_site<span class="op">$</span>trait &lt;-<span class="st"> </span><span class="kw">factor</span>(nmax_per_site<span class="op">$</span>trait,</a>
+<a class="sourceLine" id="cb14-4" data-line-number="4">  <span class="dt">levels =</span> <span class="kw">levels</span>(time_span<span class="op">$</span>trait))</a>
+<a class="sourceLine" id="cb14-5" data-line-number="5">time_span &lt;-<span class="st"> </span><span class="kw">left_join</span>(time_span, trait_grid_patterns, <span class="dt">by =</span> <span class="st">&quot;trait&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-6" data-line-number="6"><span class="st">  </span><span class="kw">left_join</span>(nmax_per_site, <span class="dt">by =</span> <span class="st">&quot;trait&quot;</span>)</a>
+<a class="sourceLine" id="cb14-7" data-line-number="7">time_span<span class="op">$</span>n2 &lt;-<span class="st"> </span><span class="kw">paste0</span>(time_span<span class="op">$</span>n, <span class="st">&quot;, &quot;</span>, time_span<span class="op">$</span>max_n,</a>
+<a class="sourceLine" id="cb14-8" data-line-number="8">  <span class="st">&quot; (pattern &quot;</span>, time_span<span class="op">$</span>pattern, <span class="st">&quot;)&quot;</span>)</a>
+<a class="sourceLine" id="cb14-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb14-10" data-line-number="10"><span class="kw">ggplot</span>(time_span, <span class="kw">aes</span>(<span class="dt">x =</span> trait,</a>
+<a class="sourceLine" id="cb14-11" data-line-number="11">  <span class="dt">ymin =</span> start_date, <span class="dt">ymax =</span> end_date, <span class="dt">color =</span> color)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-12" data-line-number="12"><span class="st">  </span><span class="kw">geom_linerange</span>(<span class="dt">size =</span> <span class="dv">1</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-13" data-line-number="13"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">y =</span> start_date)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-14" data-line-number="14"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">y =</span> end_date)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-15" data-line-number="15"><span class="st">  </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">y =</span> end_date <span class="op">+</span><span class="st"> </span><span class="dv">100000</span>, <span class="dt">label =</span> n2), <span class="dt">size =</span> <span class="fl">2.5</span>, <span class="dt">hjust =</span> <span class="dv">0</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-16" data-line-number="16"><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-17" data-line-number="17"><span class="st">  </span>ggthemes<span class="op">::</span><span class="kw">scale_color_tableau</span>(<span class="dt">palette =</span> <span class="st">&quot;Tableau 20&quot;</span>, <span class="dt">guide =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb14-18" data-line-number="18"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-12-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>After the line plotted for each variable, two numbers are reported. The first is the number of unique timestamps at which measurements were taken, and the second is the maximum number of times a single grid cell was measured. Then a reference back to the spatial grid patterns is also printed to help map temporal to spatial.</p>
+<p>From this, there are some observations:</p>
+<ol style="list-style-type: decimal">
+<li>As there was irregularity in spatial measurement density, there is also irregularity in temporal measurement density. We will need to manually extract features from each of these variables that reconciles the different time and intensity of measurements.</li>
+<li>The group of variables originally provided to D3M (<code>leaf_angle_mean</code>, etc.) are measured frequently throughout most of the time span of the season (we’ll get a clearer picture of this in more detailed plots of each variable below.).</li>
+<li>All of the variables indicated with a pink line are “hand-calculated”. They are measured after most of the other variables are measured, and they are all part of spatial pattern 1, which is very sparse. A closer look at these variables also indicated a lot of noise, and we have decided to omit them for now.</li>
+</ol>
+</div>
+<div id="constructing-ml-datasets" class="section level2">
+<h2>Constructing ML Datasets</h2>
+<p>We will construct an ML dataset for all information known up to June 1 and another for all information known up to July 1.</p>
+<p>Our approach to constructing datasets for will be to investigate each variable and determine what summary features for each that capture what is going on for that variable.</p>
+<p>As we go through each variable, we will be appending new features to the June 1 and July 1 ML datasets. Let’s start out with an empty dataset for each snapshot. Recall that the goal is to predict plant biomass for every cell in the data. Therefore, each row will be one grid cell and each column will be a feature.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="co"># June 1 data</span></a>
+<a class="sourceLine" id="cb15-2" data-line-number="2">mldat1 &lt;-<span class="st"> </span>sites <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-3" data-line-number="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">sitename2 =</span> <span class="kw">gsub</span>(<span class="st">&quot; (E|W)$&quot;</span>, <span class="st">&quot;&quot;</span>, sitename)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-4" data-line-number="4"><span class="st">  </span><span class="kw">select</span>(sitename2, range, column) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-5" data-line-number="5"><span class="st">  </span><span class="kw">distinct</span>()</a>
+<a class="sourceLine" id="cb15-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb15-7" data-line-number="7"><span class="co"># July 1 data</span></a>
+<a class="sourceLine" id="cb15-8" data-line-number="8">mldat2 &lt;-<span class="st"> </span>mldat1</a>
+<a class="sourceLine" id="cb15-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb15-10" data-line-number="10">mldat1</a></code></pre></div>
+<pre><code># A tibble: 847 x 3
+   sitename2                                    range column
+   &lt;chr&gt;                                        &lt;int&gt;  &lt;int&gt;
+ 1 MAC Field Scanner Season 4 Range 8 Column 8      8      8
+ 2 MAC Field Scanner Season 4 Range 8 Column 9      8      9
+ 3 MAC Field Scanner Season 4 Range 8 Column 10     8     10
+ 4 MAC Field Scanner Season 4 Range 8 Column 12     8     12
+ 5 MAC Field Scanner Season 4 Range 9 Column 3      9      3
+ 6 MAC Field Scanner Season 4 Range 9 Column 4      9      4
+ 7 MAC Field Scanner Season 4 Range 9 Column 5      9      5
+ 8 MAC Field Scanner Season 4 Range 9 Column 7      9      7
+ 9 MAC Field Scanner Season 4 Range 9 Column 11     9     11
+10 MAC Field Scanner Season 4 Range 9 Column 12     9     12
+# … with 837 more rows</code></pre>
+</div>
+<div id="looking-at-each-variable" class="section level2">
+<h2>Looking at Each variable</h2>
+<p>Let’s take a look at each variable to see what traits we want to focus on at each time point. Below is a plotting function that will take a variable and plot its data over time at 30 grid cells. It breaks things down by site “direction” to help us see whether measurements taken to the east or west of a grid cell are different from those measured directly at the cell. The plots will help us determine what values to use at the proposed data snapshot dates of June 1 and July 1.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">plot_cells &lt;-<span class="st"> </span><span class="cf">function</span>(d, trait, <span class="dt">date =</span> <span class="ot">NULL</span>) {</a>
+<a class="sourceLine" id="cb17-2" data-line-number="2">  <span class="cf">if</span> (<span class="kw">is.null</span>(date))</a>
+<a class="sourceLine" id="cb17-3" data-line-number="3">    date &lt;-<span class="st"> </span><span class="kw">max</span>(d<span class="op">$</span>trans_date, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb17-4" data-line-number="4">  tmp &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb17-5" data-line-number="5"><span class="st">    </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> </span><span class="op">!!</span>trait <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&lt;=</span><span class="st"> </span><span class="op">!!</span>date) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb17-6" data-line-number="6"><span class="st">    </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb17-7" data-line-number="7">      <span class="dt">site =</span> <span class="kw">gsub</span>(<span class="st">&quot;MAC Field Scanner Season 4 &quot;</span>, <span class="st">&quot;&quot;</span>, sitename2),</a>
+<a class="sourceLine" id="cb17-8" data-line-number="8">      <span class="dt">dir =</span> <span class="kw">factor</span>(</a>
+<a class="sourceLine" id="cb17-9" data-line-number="9">        <span class="kw">trimws</span>(<span class="kw">gsub</span>(<span class="st">&quot;.*Column [0-9]+(.*)&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">1&quot;</span>, sitename)),</a>
+<a class="sourceLine" id="cb17-10" data-line-number="10">        <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;&quot;</span>, <span class="st">&quot;E&quot;</span>, <span class="st">&quot;W&quot;</span>))</a>
+<a class="sourceLine" id="cb17-11" data-line-number="11">    )</a>
+<a class="sourceLine" id="cb17-12" data-line-number="12">  <span class="kw">filter</span>(tmp, site <span class="op">%in%</span><span class="st"> </span><span class="kw">unique</span>(tmp<span class="op">$</span>site)[<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>]) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb17-13" data-line-number="13"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(trans_date, mean, <span class="dt">color =</span> dir)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb17-14" data-line-number="14"><span class="st">    </span><span class="kw">geom_point</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb17-15" data-line-number="15"><span class="st">    </span><span class="kw">geom_vline</span>(</a>
+<a class="sourceLine" id="cb17-16" data-line-number="16">      <span class="dt">xintercept =</span> <span class="kw">as.POSIXct</span>(<span class="kw">c</span>(<span class="st">&quot;2017-06-01&quot;</span>, <span class="st">&quot;2017-07-01&quot;</span>)),</a>
+<a class="sourceLine" id="cb17-17" data-line-number="17">      <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb17-18" data-line-number="18"><span class="st">    </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>site, <span class="dt">nrow =</span> <span class="dv">3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb17-19" data-line-number="19"><span class="st">    </span><span class="kw">theme_bw</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb17-20" data-line-number="20"><span class="st">    </span><span class="kw">labs</span>(<span class="dt">y =</span> trait) <span class="op">+</span></a>
+<a class="sourceLine" id="cb17-21" data-line-number="21"><span class="st">    </span><span class="kw">theme</span>(</a>
+<a class="sourceLine" id="cb17-22" data-line-number="22">      <span class="dt">strip.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">8</span>),</a>
+<a class="sourceLine" id="cb17-23" data-line-number="23">      <span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">45</span>, <span class="dt">hjust =</span> <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb17-24" data-line-number="24">}</a></code></pre></div>
+<div id="planter_seed_drop" class="section level3">
+<h3><code>planter_seed_drop</code></h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;planter_seed_drop&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Number of seeds dropped per planted length of subplot row during planting&quot;</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;planter_seed_drop&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-15-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This variable is only measured on one date, “2017-04-25”. It is measured at the east and west. The values are similar.</p>
+<p>For this variable, we will create a feature that is the average value at each cell. This feature will be the same for both ML datasets since it was measured before the cutoff dates for both of them.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb21-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;planter_seed_drop&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb21-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb21-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">planter_seed_drop =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb21-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb21-6" data-line-number="6">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb21-7" data-line-number="7">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="seedling_emergence_rate" class="section level3">
+<h3><code>seedling_emergence_rate</code></h3>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;seedling_emergence_rate&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Seedling emergence rate&quot;</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;seedling_emergence_rate&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-17-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This variable is measured early on over the course of nearly two weeks. The east and west values differ but follow consistent trajectories. The trajectories seem to level off for the last week.</p>
+<p>A good feature for this variable would be to take the mean of the values after thigns have stabilized. In this case, a good cutoff appears to be May 1.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;seedling_emergence_rate&quot;</span> <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&gt;=</span><span class="st"> &quot;2017-05-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb25-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">seedling_emergence_rate =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb25-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb25-6" data-line-number="6">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb25-7" data-line-number="7">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="emergence_count" class="section level3">
+<h3><code>emergence_count</code></h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;emergence_count&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;number of plants counted within plot or subplot during emergence. Sorghum Crop Ontology Identifier CO_324:0000486 http://www.cropontology.org/terms/CO_324:0000486/Plant%20number%20-%20Counting/static-html?language=english&quot;</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;emergence_count&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-19-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This is measured in a fashion similar to <code>seedling_emergence_rate</code> and we’ll construct a feature for it in the similar manner.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb29-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;emergence_count&quot;</span> <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&gt;=</span><span class="st"> &quot;2017-05-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb29-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb29-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">emergence_count =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb29-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb29-6" data-line-number="6">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb29-7" data-line-number="7">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="surface_temperature" class="section level3">
+<h3><code>surface_temperature</code></h3>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;surface_temperature&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Surface temperature&quot;</code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;surface_temperature&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-21-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>There is a lot of variability in this variable and it appears to be quite similar for each cell, so I’m not sure how useful it would be as a feature. Ignore this for now.</p>
+</div>
+<div id="canopy_height" class="section level3">
+<h3><code>canopy_height</code></h3>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;canopy_height&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;top of the general canopy of the plant, discounting any exceptional branches, leaves or photosynthetic portions of the inflorescence.&quot;</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;canopy_height&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-22-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This is an important feature. The east/west values seem to agree except in some cases where they diverge quite a bit (e.g. Range 10 Column 12). Some further work could be done to weed out these divergences. Each vertical line represents snapshot dates of June 1 and July 1. It seems like a good feature for this variable at each snapshot date would be the last measured value, the date at which it was measured, and maybe the slope of the last 3-4 observed values prior to the snapshot date. Slope looks tricky because of some of the noise in the data, so we will omit that for now.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1">get_feat &lt;-<span class="st"> </span><span class="cf">function</span>(dt) {</a>
+<a class="sourceLine" id="cb36-2" data-line-number="2">  seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-3" data-line-number="3"><span class="st">    </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;canopy_height&quot;</span> <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&lt;=</span><span class="st"> </span><span class="op">!!</span>dt) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-4" data-line-number="4"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">trans_date2 =</span> <span class="kw">as.numeric</span>(trans_date)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-5" data-line-number="5"><span class="st">    </span><span class="kw">arrange</span>(sitename2, <span class="op">-</span>trans_date2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-6" data-line-number="6"><span class="st">    </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-7" data-line-number="7"><span class="st">    </span><span class="kw">top_n</span>(<span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-8" data-line-number="8"><span class="st">    </span><span class="kw">select</span>(sitename2, mean, trans_date) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-9" data-line-number="9"><span class="st">    </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb36-10" data-line-number="10">      <span class="dt">canopy_height =</span> <span class="kw">mean</span>(mean),</a>
+<a class="sourceLine" id="cb36-11" data-line-number="11">      <span class="dt">canopy_height_diff =</span> <span class="kw">as.numeric</span>(<span class="kw">difftime</span>(<span class="kw">as.POSIXct</span>(dt), trans_date[<span class="dv">1</span>], <span class="st">&quot;days&quot;</span>)))</a>
+<a class="sourceLine" id="cb36-12" data-line-number="12">}</a>
+<a class="sourceLine" id="cb36-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb36-14" data-line-number="14">feat1 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;2017-06-01&quot;</span>)</a>
+<a class="sourceLine" id="cb36-15" data-line-number="15">feat2 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;2017-07-01&quot;</span>)</a>
+<a class="sourceLine" id="cb36-16" data-line-number="16">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat1, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb36-17" data-line-number="17">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat2, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_angle_mean" class="section level3">
+<h3><code>leaf_angle_mean</code></h3>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_angle_mean&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_angle_mean&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-24-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>From this plot, I wouldn’t use <code>leaf_angle_mean</code> as a feature for the June 1 snapshot, but perhaps for July 1 we can use the average value for the previous month plus a the slope from a robust linear model.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">get_feat &lt;-<span class="st"> </span><span class="cf">function</span>(trait) {</a>
+<a class="sourceLine" id="cb40-2" data-line-number="2">  varname &lt;-<span class="st"> </span><span class="kw">paste0</span>(trait, <span class="st">&quot;_slope&quot;</span>)</a>
+<a class="sourceLine" id="cb40-3" data-line-number="3">  getslope &lt;-<span class="st"> </span><span class="cf">function</span>(x, y)</a>
+<a class="sourceLine" id="cb40-4" data-line-number="4">    <span class="kw">coef</span>(MASS<span class="op">::</span><span class="kw">rlm</span>(y <span class="op">~</span><span class="st"> </span>x))[<span class="dv">2</span>]</a>
+<a class="sourceLine" id="cb40-5" data-line-number="5">  seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb40-6" data-line-number="6"><span class="st">    </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> </span><span class="op">!!</span>trait <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&lt;=</span><span class="st"> &quot;2017-07-01&quot;</span> <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&gt;=</span><span class="st"> &quot;2016-01-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb40-7" data-line-number="7"><span class="st">    </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb40-8" data-line-number="8"><span class="st">    </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb40-9" data-line-number="9">      <span class="op">!!</span>trait <span class="op">:</span><span class="er">=</span><span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">n</span>() <span class="op">&gt;</span><span class="st"> </span><span class="dv">3</span>, <span class="kw">mean</span>(mean), <span class="ot">NA</span>),</a>
+<a class="sourceLine" id="cb40-10" data-line-number="10">      <span class="op">!!</span>varname <span class="op">:</span><span class="er">=</span><span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">n</span>() <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>, <span class="kw">getslope</span>(<span class="kw">as.numeric</span>(<span class="kw">as.Date</span>(trans_date)), mean), <span class="ot">NA</span>)</a>
+<a class="sourceLine" id="cb40-11" data-line-number="11">    )</a>
+<a class="sourceLine" id="cb40-12" data-line-number="12">}</a>
+<a class="sourceLine" id="cb40-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb40-14" data-line-number="14">feat &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_angle_mean&quot;</span>)</a>
+<a class="sourceLine" id="cb40-15" data-line-number="15">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_angle_chi" class="section level3">
+<h3><code>leaf_angle_chi</code></h3>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_angle_chi&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_angle_chi&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-26-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Same here.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1">feat &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_angle_chi&quot;</span>)</a>
+<a class="sourceLine" id="cb44-2" data-line-number="2">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_angle_beta" class="section level3">
+<h3><code>leaf_angle_beta</code></h3>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_angle_beta&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_angle_beta&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-28-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Same here.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1">feat &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_angle_beta&quot;</span>)</a>
+<a class="sourceLine" id="cb48-2" data-line-number="2">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_angle_alpha" class="section level3">
+<h3><code>leaf_angle_alpha</code></h3>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_angle_alpha&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_angle_alpha&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-30-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Same here.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" data-line-number="1">feat &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_angle_alpha&quot;</span>)</a>
+<a class="sourceLine" id="cb52-2" data-line-number="2">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="panicle_volume" class="section level3">
+<h3><code>panicle_volume</code></h3>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;panicle_volume&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;panicle_volume&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-32-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This one is interesting. All 30 panels in this plot only show data from Aug 22 - Aug 30. However, we know that in other cells it is measured at other dates:</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;panicle_volume&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb56-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of panicle volume measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-33-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>There aren’t many measurements before July 1 though so for now we will ignore this variable.</p>
+</div>
+<div id="panicle_surface_area" class="section level3">
+<h3><code>panicle_surface_area</code></h3>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;panicle_surface_area&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;panicle_surface_area&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-34-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Similar to <code>panicle_volume</code>…</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;panicle_surface_area&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb60-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of panicle surface area measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-35-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="panicle_count" class="section level3">
+<h3><code>panicle_count</code></h3>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;panicle_count&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;&quot;</code></pre>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;panicle_count&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-36-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Similar to <code>panicle_volume</code>…</p>
+</div>
+<div id="plant_basal_tiller_number" class="section level3">
+<h3><code>plant_basal_tiller_number</code></h3>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;plant_basal_tiller_number&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Sorghum Crop Ontology Identifier CO_324:0000040. Number of basal tillers.&quot;</code></pre>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;plant_basal_tiller_number&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-37-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>These are all done being measured before the June 1 snapshot. Perhaps the average of the values reported on the last date (May 30)?</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;plant_basal_tiller_number&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">==</span><span class="st"> &quot;2017-05-31&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb67-5" data-line-number="5">    <span class="dt">plant_basal_tiller_number =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb67-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb67-7" data-line-number="7">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb67-8" data-line-number="8">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="stem_elongated_internodes_number" class="section level3">
+<h3><code>stem_elongated_internodes_number</code></h3>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;stem_elongated_internodes_number&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Sorghum Crop Ontology Identifier CO_324:0000235. Number of elongated internodes on the main stem.&quot;</code></pre>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;stem_elongated_internodes_number&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-39-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>These seem pretty consistent across cells. Perhaps the slope of the most recent 20-ish observations would be a good feature at each time point.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" data-line-number="1">get_feat &lt;-<span class="st"> </span><span class="cf">function</span>(trait, date) {</a>
+<a class="sourceLine" id="cb71-2" data-line-number="2">  varname &lt;-<span class="st"> </span><span class="kw">paste0</span>(trait, <span class="st">&quot;_slope&quot;</span>)</a>
+<a class="sourceLine" id="cb71-3" data-line-number="3">  getslope &lt;-<span class="st"> </span><span class="cf">function</span>(x, y)</a>
+<a class="sourceLine" id="cb71-4" data-line-number="4">    <span class="kw">coef</span>(MASS<span class="op">::</span><span class="kw">rlm</span>(y <span class="op">~</span><span class="st"> </span>x))[<span class="dv">2</span>]</a>
+<a class="sourceLine" id="cb71-5" data-line-number="5">  seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb71-6" data-line-number="6"><span class="st">    </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> </span><span class="op">!!</span>trait <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&lt;=</span><span class="st"> </span><span class="op">!!</span>date <span class="op">&amp;</span><span class="st"> </span>trans_date <span class="op">&gt;=</span><span class="st"> </span><span class="op">!!</span>date <span class="op">-</span><span class="st"> </span><span class="dv">30</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb71-7" data-line-number="7"><span class="st">    </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb71-8" data-line-number="8"><span class="st">    </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb71-9" data-line-number="9">      <span class="op">!!</span>varname <span class="op">:</span><span class="er">=</span><span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">n</span>() <span class="op">&gt;</span><span class="st"> </span><span class="dv">8</span>, <span class="kw">getslope</span>(<span class="kw">as.numeric</span>(<span class="kw">as.Date</span>(trans_date)), mean), <span class="ot">NA</span>)</a>
+<a class="sourceLine" id="cb71-10" data-line-number="10">    )</a>
+<a class="sourceLine" id="cb71-11" data-line-number="11">}</a>
+<a class="sourceLine" id="cb71-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb71-13" data-line-number="13">feat1 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;stem_elongated_internodes_number&quot;</span>, <span class="kw">as.Date</span>(<span class="st">&quot;2017-06-01&quot;</span>))</a>
+<a class="sourceLine" id="cb71-14" data-line-number="14">feat2 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;stem_elongated_internodes_number&quot;</span>, <span class="kw">as.Date</span>(<span class="st">&quot;2017-07-01&quot;</span>))</a>
+<a class="sourceLine" id="cb71-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb71-16" data-line-number="16">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat1, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb71-17" data-line-number="17">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat2, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="canopy_cover" class="section level3">
+<h3><code>canopy_cover</code></h3>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;canopy_cover&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Fraction of ground covered by plant&quot;</code></pre>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;canopy_cover&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-41-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This changes a lot over time, but appears to be consistently measured right on May 25. Perhaps the average measurement on May 25 would be a good feature.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb75-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;canopy_cover&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">==</span><span class="st"> &quot;2017-05-25&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb75-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb75-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb75-5" data-line-number="5">    <span class="dt">canopy_cover =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb75-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb75-7" data-line-number="7">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb75-8" data-line-number="8">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="stand_count" class="section level3">
+<h3><code>stand_count</code></h3>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;stand_count&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Number of plants per subplot or plot, counted after thinning&quot;</code></pre>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;stand_count&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-43-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>It is measured at most on one date per cell, but there can be some pretty large discrepancies in the value based on direction. Use simple average as a feature.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;stand_count&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb79-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of stand count measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-44-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb80-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb80-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;stand_count&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">&lt;=</span><span class="st"> &quot;2017-06-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb80-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb80-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb80-5" data-line-number="5">    <span class="dt">stand_count =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb80-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb80-7" data-line-number="7">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb80-8" data-line-number="8">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="stalk_diameter_minor_axis" class="section level3">
+<h3><code>stalk_diameter_minor_axis</code></h3>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_minor_axis&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Diameter of the thinnest axis of the stalk in the internodal area below the most recent fully developed leaf, including the true stem and leaf sheath&quot;</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;stalk_diameter_minor_axis&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-46-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_minor_axis&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb84-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of stalk_diameter_minor_axis measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-47-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>All values measured on June 1. Use average as feature.</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb85-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_minor_axis&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">&lt;=</span><span class="st"> &quot;2017-06-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb85-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">stalk_diameter_minor_axis =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb85-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb85-6" data-line-number="6">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb85-7" data-line-number="7">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="stalk_diameter_major_axis" class="section level3">
+<h3><code>stalk_diameter_major_axis</code></h3>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb86-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_major_axis&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Diameter of the widest axis of the stalk in the internodal area below the most recent fully developed leaf, including the true stem and leaf sheath&quot;</code></pre>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb88-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;stalk_diameter_major_axis&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-49-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_major_axis&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb89-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of stalk_diameter_major_axis measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-50-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Same here</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb90-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_major_axis&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">&lt;=</span><span class="st"> &quot;2017-06-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb90-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb90-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb90-5" data-line-number="5">    <span class="dt">stalk_diameter_major_axis =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb90-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb90-7" data-line-number="7">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb90-8" data-line-number="8">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_width" class="section level3">
+<h3><code>leaf_width</code></h3>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_width&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;width of leaf at widest point along leaf&quot;</code></pre>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_width&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-52-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;leaf_width&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb94-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of leaf_width measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-53-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Use June 1 average for first snapshot feature. Use June 14 average for second snapshot feature.</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" data-line-number="1">get_feat &lt;-<span class="st"> </span><span class="cf">function</span>(trait, date) {</a>
+<a class="sourceLine" id="cb95-2" data-line-number="2">  seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb95-3" data-line-number="3"><span class="st">    </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> </span><span class="op">!!</span>trait <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">&lt;=</span><span class="st"> </span><span class="op">!!</span>date) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb95-4" data-line-number="4"><span class="st">    </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb95-5" data-line-number="5"><span class="st">    </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb95-6" data-line-number="6">      <span class="op">!!</span>trait <span class="op">:</span><span class="er">=</span><span class="st"> </span><span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb95-7" data-line-number="7">}</a>
+<a class="sourceLine" id="cb95-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb95-9" data-line-number="9">feat1 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_width&quot;</span>, <span class="st">&quot;2017-06-01&quot;</span>)</a>
+<a class="sourceLine" id="cb95-10" data-line-number="10">feat2 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_width&quot;</span>, <span class="st">&quot;2017-07-01&quot;</span>)</a>
+<a class="sourceLine" id="cb95-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb95-12" data-line-number="12">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat1, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb95-13" data-line-number="13">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat2, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_length" class="section level3">
+<h3><code>leaf_length</code></h3>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb96-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_length&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Length of leaf from tip to stem along the midrib.&quot;</code></pre>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_length&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-55-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;leaf_length&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb99-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of leaf_length measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-56-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Same here.</p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1">feat1 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_length&quot;</span>, <span class="st">&quot;2017-06-01&quot;</span>)</a>
+<a class="sourceLine" id="cb100-2" data-line-number="2">feat2 &lt;-<span class="st"> </span><span class="kw">get_feat</span>(<span class="st">&quot;leaf_length&quot;</span>, <span class="st">&quot;2017-07-01&quot;</span>)</a>
+<a class="sourceLine" id="cb100-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb100-4" data-line-number="4">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, feat1, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb100-5" data-line-number="5">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat2, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="leaf_desiccation_present" class="section level3">
+<h3><code>leaf_desiccation_present</code></h3>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb101-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_desiccation_present&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Presence or absence of leaves showing desiccation. 1 = present, 0 = absent&quot;</code></pre>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_desiccation_present&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-58-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;leaf_desiccation_present&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb104-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of leaf_desiccation_present measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-59-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>No feature for June 1. Average for July 1.</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" data-line-number="1">feat &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb105-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;leaf_desiccation_present&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">as.Date</span>(trans_date) <span class="op">&lt;=</span><span class="st"> &quot;2017-07-01&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb105-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(sitename2) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb105-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(</a>
+<a class="sourceLine" id="cb105-5" data-line-number="5">    <span class="dt">leaf_desiccation_present =</span> <span class="kw">mean</span>(mean))</a>
+<a class="sourceLine" id="cb105-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb105-7" data-line-number="7">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, feat, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+</div>
+<div id="panicle_height" class="section level3">
+<h3><code>panicle_height</code></h3>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;panicle_height&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;height to top of panicle&quot;</code></pre>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;panicle_height&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-61-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Maybe not enough data to be a reliable feature?</p>
+</div>
+<div id="leaf_temperature" class="section level3">
+<h3><code>leaf_temperature</code></h3>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb109-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_temperature&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;temperature of the surface of a sunlit leaf&quot;</code></pre>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_temperature&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-62-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Ignore for now…</p>
+</div>
+<div id="leaf_stomatal_conductance" class="section level3">
+<h3><code>leaf_stomatal_conductance</code></h3>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;leaf_stomatal_conductance&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Stomatal conductance is a function of the density, size, and open versus closed status of stomatal pores in the leaf.&quot;</code></pre>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb114-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;leaf_stomatal_conductance&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-63-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<!--
+
+-->
+<p>Ignore this one for now…</p>
+</div>
+<div id="lodging_present" class="section level3">
+<h3><code>lodging_present</code></h3>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb115-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;lodging_present&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Plant lodging: presence or absence of lodging or severe leaning within a plot. 1 = present, 0 = absent. Sorghum Crop Ontology Identifier CO_324:0000283.&quot;</code></pre>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb117-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;lodging_present&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-65-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Use average for both periods.</p>
+</div>
+<div id="stalk_diameter_fixed_height" class="section level3">
+<h3><code>stalk_diameter_fixed_height</code></h3>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_fixed_height&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Diameter of the stalk in the internodal area nearest to the given measurement height&quot;</code></pre>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;stalk_diameter_fixed_height&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-66-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>There is a lot of variability in measurement here… Ignore for now.</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb121-1" data-line-number="1"><span class="kw">plot</span>(<span class="kw">table</span>(<span class="kw">as.Date</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;stalk_diameter_fixed_height&quot;</span>)<span class="op">$</span>trans_date)),</a>
+<a class="sourceLine" id="cb121-2" data-line-number="2">  <span class="dt">ylab =</span> <span class="st">&quot;number of stalk_diameter_fixed_height measurements&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-67-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This is all measured after July 1, so we won’t include it in either snapshot.</p>
+</div>
+<div id="grain_stage_time" class="section level3">
+<h3><code>grain_stage_time</code></h3>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb122-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;grain_stage_time&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Number of days from sowing to the date when grain development was observed in approximately 50% of the plants within a plot&quot;</code></pre>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb124-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;grain_stage_time&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-68-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>All are measured after July 1.</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb125-1" data-line-number="1"><span class="kw">unique</span>(<span class="kw">filter</span>(seas4, trait <span class="op">==</span><span class="st"> &quot;grain_stage_time&quot;</span>)<span class="op">$</span>trans_date) </a></code></pre></div>
+<pre><code>[1] &quot;2017-07-20 22:00:00 MST&quot;</code></pre>
+</div>
+<div id="flowering_time" class="section level3">
+<h3><code>flowering_time</code></h3>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb127-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;flowering_time&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Number of days from sowing to the date when 50% of the plants in a plot reach flowering (anthesis), defined as the time when 50% of the anthers on 50% of the plants in a plot have emerged.&quot;</code></pre>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb129-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;flowering_time&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-70-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Same as <code>grain_stage_time</code>.</p>
+</div>
+<div id="flag_leaf_emergence_time" class="section level3">
+<h3><code>flag_leaf_emergence_time</code></h3>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb130-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;flag_leaf_emergence_time&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Number days from sowing to the date when 50% of the plants in a plot have reached flag leaf emergence (ligulation) stage. Flag leaf is the last leaf to emerge from the whorl, positioned directly below the panicle.&quot;</code></pre>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb132-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;flag_leaf_emergence_time&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-71-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Same as <code>grain_stage_time</code>. If this and the past two variables turn out to be important from a domain expertise point of view, we can make another late-July snapshot and include them to see how they contribute to predicting biomass.</p>
+</div>
+<div id="harvest_lodging_rating" class="section level3">
+<h3><code>harvest_lodging_rating</code></h3>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb133-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;harvest_lodging_rating&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Categorical rating of lodging severity at harvest. 0 = none; 1 = light to moderate lodging; 2 = severe lodging&quot;</code></pre>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb135-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;harvest_lodging_rating&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-72-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>Measured in September.</p>
+</div>
+<div id="aboveground_dry_biomass" class="section level3">
+<h3><code>aboveground_dry_biomass</code></h3>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb136-1" data-line-number="1"><span class="kw">filter</span>(traits, trait <span class="op">==</span><span class="st"> &quot;aboveground_dry_biomass&quot;</span>)<span class="op">$</span>trait_description</a></code></pre></div>
+<pre><code>[1] &quot;Aboveground Dry Biomass&quot;</code></pre>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb138-1" data-line-number="1"><span class="kw">plot_cells</span>(seas4, <span class="st">&quot;aboveground_dry_biomass&quot;</span>)</a></code></pre></div>
+<p><img src="figure/exploratory.Rmd/unnamed-chunk-73-1.png" width="1305.6" style="display: block; margin: auto;" /></p>
+<p>This is the outcome variable we are interested in. It is just a single value for each cell.</p>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb139-1" data-line-number="1">outcome &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb139-2" data-line-number="2"><span class="st">  </span><span class="kw">filter</span>(trait <span class="op">==</span><span class="st"> &quot;aboveground_dry_biomass&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb139-3" data-line-number="3"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">aboveground_dry_biomass =</span> mean) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb139-4" data-line-number="4"><span class="st">  </span><span class="kw">select</span>(sitename2, aboveground_dry_biomass)</a>
+<a class="sourceLine" id="cb139-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb139-6" data-line-number="6">mldat1 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat1, outcome, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a>
+<a class="sourceLine" id="cb139-7" data-line-number="7">mldat2 &lt;-<span class="st"> </span><span class="kw">left_join</span>(mldat2, outcome, <span class="dt">by =</span> <span class="st">&quot;sitename2&quot;</span>)</a></code></pre></div>
+<p>This is the final thing we need to add to our ML datasets!</p>
+<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb140-1" data-line-number="1">readr<span class="op">::</span><span class="kw">write_csv</span>(mldat1, <span class="dt">path =</span> <span class="st">&quot;data/mldat_june1.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb140-2" data-line-number="2">readr<span class="op">::</span><span class="kw">write_csv</span>(mldat2, <span class="dt">path =</span> <span class="st">&quot;data/mldat_july1.csv&quot;</span>)</a></code></pre></div>
+<!--
+Hand-measured Traits
+Note that we have ignored all of the 
+-->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb141-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Catalina 10.15.2
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.3     purrr_0.3.3    
+ [5] readr_1.3.1     tidyr_1.0.0     tibble_2.1.3    ggplot2_3.2.1  
+ [9] tidyverse_1.3.0 workflowr_1.6.0
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_0.2.5 xfun_0.12        ggthemes_4.2.0   haven_2.2.0     
+ [5] lattice_0.20-38  colorspace_1.4-1 vctrs_0.2.1      generics_0.0.2  
+ [9] htmltools_0.4.0  yaml_2.2.0       utf8_1.1.4       rlang_0.4.2     
+[13] later_1.0.0      pillar_1.4.3     withr_2.1.2      glue_1.3.1      
+[17] DBI_1.0.0        dbplyr_1.4.2     modelr_0.1.5     readxl_1.3.1    
+[21] lifecycle_0.1.0  munsell_0.5.0    gtable_0.3.0     cellranger_1.1.0
+[25] rvest_0.3.5      evaluate_0.14    labeling_0.3     knitr_1.27      
+[29] httpuv_1.5.2     fansi_0.4.1      broom_0.5.2      Rcpp_1.0.3      
+[33] promises_1.1.0   backports_1.1.5  scales_1.1.0     jsonlite_1.6    
+[37] farver_2.0.1     fs_1.3.1         hms_0.5.3        digest_0.6.23   
+[41] stringi_1.4.5    grid_3.6.1       rprojroot_1.3-2  cli_2.0.1       
+[45] tools_3.6.1      magrittr_1.5     lazyeval_0.2.2   crayon_1.3.4    
+[49] pkgconfig_2.0.3  zeallot_0.1.0    MASS_7.3-51.4    ellipsis_0.3.0  
+[53] xml2_1.2.2       reprex_0.3.0     lubridate_1.7.4  rstudioapi_0.10 
+[57] assertthat_0.2.1 rmarkdown_2.0    httr_1.4.1       R6_2.4.1        
+[61] nlme_3.1-140     git2r_0.26.1     compiler_3.6.1  </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

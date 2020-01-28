@@ -1,0 +1,820 @@
+---
+title: "Exploratory Analysis"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+In [preprocessing](datapreprocess.html), we cleaned up the raw TERRA data. It is worthwhile to scan that section if you haven't. We'll now do some exploration of the resulting dataset.
+
+## Goal
+
+The underlying goal behind the exploration is to understand the structure of the data so that we can better construct training data for our ML models.
+
+The scientific goal is to predict final plant biomass, as measured by `aboveground_dry_biomass`, for each plant, using all the other traits available. We want to understand all of the variables to be able to know how to construct the appropriate dataset as input for our ML models. The challenge is that the traits measured for each plant are measured at different times, so at any given time point, we want to be able to construct a dataset with features that best represent the state of the measurements at that time.
+
+```{r message=FALSE}
+library(tidyverse)
+load("data/seas4.Rdata")
+```
+
+## Number of measurements
+
+With this data, we are dealing with several types of measurements taken at different times and from different locations. To get a feel for how many times variables are measured:
+
+```{r}
+seas4 %>%
+  group_by(trait) %>%
+  tally() %>%
+  arrange(-n)
+```
+
+There's a good amount of variability. The number of times a variable is measured depends on the spatial and temporal density of measurements, so we will look into this further.
+
+## Sites
+
+It's first good to have a better understanding of the site variables. There are `r length(unique(seas4$sitename))` unique sites, which we will also refer to as "grid cells":
+
+```{r}
+head(sort(unique(seas4$sitename)))
+```
+
+As can be seen, sites are on a grid indicated by a range (row) and column. There is also sometimes an appended "E" and "W" to a site name, which we are interpreting as a "direction" at which the measurement was made on that particular grid cell.
+
+Using the provided latitude and longitude, we can get a feel for the layout of the field.
+
+```{r fig.width=5.3, fig.height=9.1}
+sites2 <- sites %>%
+  mutate(size = ifelse(dir == "", 4, 2)) %>%
+  arrange(dir)
+ggplot(sites2, aes(lon, lat, color = dir)) +
+  geom_point(alpha = 0.9, size = sites2$size) +
+  ggthemes::scale_color_tableau(palette = "Tableau 10",
+    name = "site suffix") +
+  theme_minimal() +
+  coord_fixed(ratio = 0.3620315)
+```
+
+As can be seen, the "E" and "W" sitenames do appear to be measured directly to the east and west of the grid cells.
+
+It is worth noting that each "cell" contains one variety of sorghum. Thus we can think of the "E/W" measurements, e.g. "Range 10 Column 10", "Range 10 Column 10 E", "Range 10 Column 10 W" as all measuring the same outcome. For this reason, we will construct ML datasets that have a set of features for each cell, without respect for the "E/W", where the "E/W" measurements will either be accounted for as new features, or lumped into the non-directional measurement, if applicable.
+
+Which variables have E/W measurements?
+
+```{r}
+filter(seas4, grepl(" (E|W)$", sitename)) %>%
+  pull(trait) %>%
+  unique()
+```
+
+## Spatial Density of Measurements
+
+Now let's get a feel for how many times each variable was measured at each grid cell. The code below counts, for each variable, what percentage of measurements come from each grid cell as well as how many grid cells a measurement is present in.
+
+```{r}
+trait_site_freq <- seas4 %>%
+  group_by(trait, sitename, lat, lon) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  group_by(trait) %>%
+  mutate(
+    pct = n / sum(n),
+    npoints = n()) %>%
+  ungroup() %>%
+  mutate(trait2 = fct_reorder(trait, npoints, mean))
+```
+
+Before we plot these, we'll create a measurement "pattern" variable that assigns a spatial pattern number to each sampling pattern that we will see in the visualizations.
+
+```{r echo=FALSE, eval=FALSE}
+trait_site_freq %>%
+  group_by(trait) %>%
+  summarise(n = n()) %>%
+  arrange(-n)
+```
+
+```{r}
+trait_grid_patterns <- tibble(
+  trait2 = factor(levels(trait_site_freq$trait2),
+    levels(trait_site_freq$trait2)),
+  pattern = c(rep(1, 44), rep(2, 8), rep(3, 6), rep(4, 4),
+    rep(5, 2), rep(6, 10), rep(7, 2), 7),
+  lat = max(trait_site_freq$lat),
+  lon = max(trait_site_freq$lon)
+)
+```
+
+Let's plot grids for the 39 (out of 77) most sparsely spatially measured trait variables:
+
+```{r fig.width=15, fig.height=9.1}
+d1 <- filter(trait_site_freq, trait2 %in% levels(trait2)[1:39])
+d2 <- filter(trait_grid_patterns, trait2 %in% levels(trait2)[1:39])
+ggplot(d1, aes(lon, lat, size = pct)) +
+  geom_point(alpha = 0.7) +
+  geom_text(aes(label = pattern, size = NULL), data = d2) +
+  theme_bw() +
+  scale_size_continuous(guide = FALSE) +
+  facet_wrap(~ trait2, nrow = 3, ncol = 13) +
+  coord_fixed(ratio = 0.3620315) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 6))
+```
+
+All of these have pretty much the same pattern, all labeled as "pattern 1".
+
+Let's look at the rest of the variables:
+
+```{r fig.width=15, fig.height=9.1}
+d1 <- filter(trait_site_freq, trait2 %in% levels(trait2)[40:77])
+d2 <- filter(trait_grid_patterns, trait2 %in% levels(trait2)[40:77])
+ggplot(d1, aes(lon, lat, size = pct)) +
+  geom_point(alpha = 0.7) +
+  geom_text(aes(label = pattern, size = NULL), data = d2) +
+  theme_bw() +
+  scale_size_continuous(guide = FALSE) +
+  facet_wrap(~ trait2, nrow = 3, ncol = 13) +
+  coord_fixed(ratio = 0.3620315) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 6))
+```
+
+The first 5 variables have the same "pattern 1" as the others that we saw. Then we see about 6 other patterns of spatial measurement for the rest of the variables, as labeled in the top right corner of each panel.
+
+It is nice to see that the target variable we are interested in, `aboveground_dry_biomass`, has good spatial measurement. This plot will be good to refer to as we consider other variables we want to use to predict plant biomass, since each grid cell contains a plant and therefore we would like to have predictor measurements for each cell we are trying to predict.
+
+## Temporal Span of Measurements
+
+It's also useful to understand how frequently (and at what point in time) variables are measured.
+
+Here we construct a data frame that contains the first and last time each variable is measured, as well as how many unique timestamps the variable is measured at.
+
+```{r}
+nmax_per_site <- seas4 %>%
+  group_by(trait, sitename) %>%
+  summarise(n = length(unique(trans_date))) %>%
+  group_by(trait) %>%
+  summarise(max_n = max(n)) %>%
+  arrange(max_n)
+
+time_span <- seas4 %>%
+  group_by(trait) %>%
+  summarise(
+    start_date = min(trans_date),
+    end_date = max(trans_date),
+    n = length(unique(trans_date))
+  ) %>%
+  arrange(end_date) %>%
+  mutate(
+    color = as.character(start_date),
+    trait = fct_reorder2(trait, start_date, end_date, function(x, y) {
+      seas4 <- as.numeric(min(x))
+      yy <- as.numeric(max(y))
+      seas4^2 + yy - seas4
+    })
+  )
+```
+
+Let's look at a visual of this:
+
+```{r fig.width=13.6, fig.height=8}
+trait_grid_patterns$trait <- factor(trait_grid_patterns$trait2,
+  levels = levels(time_span$trait))
+nmax_per_site$trait <- factor(nmax_per_site$trait,
+  levels = levels(time_span$trait))
+time_span <- left_join(time_span, trait_grid_patterns, by = "trait") %>%
+  left_join(nmax_per_site, by = "trait")
+time_span$n2 <- paste0(time_span$n, ", ", time_span$max_n,
+  " (pattern ", time_span$pattern, ")")
+
+ggplot(time_span, aes(x = trait,
+  ymin = start_date, ymax = end_date, color = color)) +
+  geom_linerange(size = 1) +
+  geom_point(aes(y = start_date)) +
+  geom_point(aes(y = end_date)) +
+  geom_text(aes(y = end_date + 100000, label = n2), size = 2.5, hjust = 0) +
+  coord_flip() +
+  ggthemes::scale_color_tableau(palette = "Tableau 20", guide = FALSE) +
+  theme_bw()
+```
+
+After the line plotted for each variable, two numbers are reported. The first is the number of unique timestamps at which measurements were taken, and the second is the maximum number of times a single grid cell was measured. Then a reference back to the spatial grid patterns is also printed to help map temporal to spatial.
+
+From this, there are some observations:
+
+1. As there was irregularity in spatial measurement density, there is also irregularity in temporal measurement density. We will need to manually extract features from each of these variables that reconciles the different time and intensity of measurements.
+2. The group of variables originally provided to D3M (`leaf_angle_mean`, etc.) are measured frequently throughout most of the time span of the season (we'll get a clearer picture of this in more detailed plots of each variable below.).
+3. All of the variables indicated with a pink line are "hand-calculated". They are measured after most of the other variables are measured, and they are all part of spatial pattern 1, which is very sparse. A closer look at these variables also indicated a lot of noise, and we have decided to omit them for now.
+
+## Constructing ML Datasets
+
+We will construct an ML dataset for all information known up to June 1 and another for all information known up to July 1.
+
+Our approach to constructing datasets for will be to investigate each variable and determine what summary features for each that capture what is going on for that variable.
+
+As we go through each variable, we will be appending new features to the June 1 and July 1 ML datasets. Let's start out with an empty dataset for each snapshot. Recall that the goal is to predict plant biomass for every cell in the data. Therefore, each row will be one grid cell and each column will be a feature.
+
+```{r}
+# June 1 data
+mldat1 <- sites %>%
+  mutate(sitename2 = gsub(" (E|W)$", "", sitename)) %>%
+  select(sitename2, range, column) %>%
+  distinct()
+
+# July 1 data
+mldat2 <- mldat1
+
+mldat1
+```
+
+## Looking at Each variable
+
+Let's take a look at each variable to see what traits we want to focus on at each time point. Below is a plotting function that will take a variable and plot its data over time at 30 grid cells. It breaks things down by site "direction" to help us see whether measurements taken to the east or west of a grid cell are different from those measured directly at the cell. The plots will help us determine what values to use at the proposed data snapshot dates of June 1 and July 1.
+
+```{r}
+plot_cells <- function(d, trait, date = NULL) {
+  if (is.null(date))
+    date <- max(d$trans_date, na.rm = TRUE)
+  tmp <- d %>%
+    filter(trait == !!trait & trans_date <= !!date) %>%
+    mutate(
+      site = gsub("MAC Field Scanner Season 4 ", "", sitename2),
+      dir = factor(
+        trimws(gsub(".*Column [0-9]+(.*)", "\\1", sitename)),
+        levels = c("", "E", "W"))
+    )
+  filter(tmp, site %in% unique(tmp$site)[1:30]) %>%
+  ggplot(aes(trans_date, mean, color = dir)) +
+    geom_point() +
+    geom_vline(
+      xintercept = as.POSIXct(c("2017-06-01", "2017-07-01")),
+      alpha = 0.3) +
+    facet_wrap(~ site, nrow = 3) +
+    theme_bw() +
+    labs(y = trait) +
+    theme(
+      strip.text.x = element_text(size = 8),
+      axis.text.x = element_text(angle = 45, hjust = 1))
+}
+```
+
+### `planter_seed_drop`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "planter_seed_drop")$trait_description
+plot_cells(seas4, "planter_seed_drop")
+```
+
+This variable is only measured on one date, "2017-04-25". It is measured at the east and west. The values are similar.
+
+For this variable, we will create a feature that is the average value at each cell. This feature will be the same for both ML datasets since it was measured before the cutoff dates for both of them.
+
+```{r}
+feat <- seas4 %>%
+  filter(trait == "planter_seed_drop") %>%
+  group_by(sitename2) %>%
+  summarise(planter_seed_drop = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `seedling_emergence_rate`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "seedling_emergence_rate")$trait_description
+plot_cells(seas4, "seedling_emergence_rate")
+```
+
+This variable is measured early on over the course of nearly two weeks. The east and west values differ but follow consistent trajectories. The trajectories seem to level off for the last week.
+
+A good feature for this variable would be to take the mean of the values after thigns have stabilized. In this case, a good cutoff appears to be May 1.
+
+```{r}
+feat <- seas4 %>%
+  filter(trait == "seedling_emergence_rate" & trans_date >= "2017-05-01") %>%
+  group_by(sitename2) %>%
+  summarise(seedling_emergence_rate = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `emergence_count`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "emergence_count")$trait_description
+plot_cells(seas4, "emergence_count")
+```
+
+This is measured in a fashion similar to `seedling_emergence_rate` and we'll construct a feature for it in the similar manner.
+
+```{r}
+feat <- seas4 %>%
+  filter(trait == "emergence_count" & trans_date >= "2017-05-01") %>%
+  group_by(sitename2) %>%
+  summarise(emergence_count = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `surface_temperature`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "surface_temperature")$trait_description
+plot_cells(seas4, "surface_temperature")
+```
+
+There is a lot of variability in this variable and it appears to be quite similar for each cell, so I'm not sure how useful it would be as a feature. Ignore this for now.
+
+### `canopy_height`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "canopy_height")$trait_description
+plot_cells(seas4, "canopy_height")
+```
+
+This is an important feature. The east/west values seem to agree except in some cases where they diverge quite a bit (e.g. Range 10 Column 12). Some further work could be done to weed out these divergences. Each vertical line represents snapshot dates of June 1 and July 1. It seems like a good feature for this variable at each snapshot date would be the last measured value, the date at which it was measured, and maybe the slope of the last 3-4 observed values prior to the snapshot date. Slope looks tricky because of some of the noise in the data, so we will omit that for now.
+
+```{r message=FALSE}
+get_feat <- function(dt) {
+  seas4 %>%
+    filter(trait == "canopy_height" & trans_date <= !!dt) %>%
+    mutate(trans_date2 = as.numeric(trans_date)) %>%
+    arrange(sitename2, -trans_date2) %>%
+    group_by(sitename2) %>%
+    top_n(1) %>%
+    select(sitename2, mean, trans_date) %>%
+    summarise(
+      canopy_height = mean(mean),
+      canopy_height_diff = as.numeric(difftime(as.POSIXct(dt), trans_date[1], "days")))
+}
+
+feat1 <- get_feat("2017-06-01")
+feat2 <- get_feat("2017-07-01")
+mldat1 <- left_join(mldat1, feat1, by = "sitename2")
+mldat2 <- left_join(mldat2, feat2, by = "sitename2")
+```
+
+### `leaf_angle_mean`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_angle_mean")$trait_description
+plot_cells(seas4, "leaf_angle_mean")
+```
+
+From this plot, I wouldn't use `leaf_angle_mean` as a feature for the June 1 snapshot, but perhaps for July 1 we can use the average value for the previous month plus a the slope from a robust linear model.
+
+```{r warning=FALSE}
+get_feat <- function(trait) {
+  varname <- paste0(trait, "_slope")
+  getslope <- function(x, y)
+    coef(MASS::rlm(y ~ x))[2]
+  seas4 %>%
+    filter(trait == !!trait & trans_date <= "2017-07-01" & trans_date >= "2016-01-01") %>%
+    group_by(sitename2) %>%
+    summarise(
+      !!trait := ifelse(n() > 3, mean(mean), NA),
+      !!varname := ifelse(n() > 10, getslope(as.numeric(as.Date(trans_date)), mean), NA)
+    )
+}
+
+feat <- get_feat("leaf_angle_mean")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `leaf_angle_chi`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_angle_chi")$trait_description
+plot_cells(seas4, "leaf_angle_chi")
+```
+
+Same here.
+
+```{r warning=FALSE}
+feat <- get_feat("leaf_angle_chi")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `leaf_angle_beta`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_angle_beta")$trait_description
+plot_cells(seas4, "leaf_angle_beta")
+```
+
+Same here.
+
+```{r warning=FALSE}
+feat <- get_feat("leaf_angle_beta")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `leaf_angle_alpha`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_angle_alpha")$trait_description
+plot_cells(seas4, "leaf_angle_alpha")
+```
+
+Same here.
+
+```{r warning=FALSE}
+feat <- get_feat("leaf_angle_alpha")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `panicle_volume`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "panicle_volume")$trait_description
+plot_cells(seas4, "panicle_volume")
+```
+
+This one is interesting. All 30 panels in this plot only show data from Aug 22 - Aug 30. However, we know that in other cells it is measured at other dates:
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "panicle_volume")$trans_date)),
+  ylab = "number of panicle volume measurements")
+```
+
+There aren't many measurements before July 1 though so for now we will ignore this variable.
+
+### `panicle_surface_area`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "panicle_surface_area")$trait_description
+plot_cells(seas4, "panicle_surface_area")
+```
+
+Similar to `panicle_volume`...
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "panicle_surface_area")$trans_date)),
+  ylab = "number of panicle surface area measurements")
+```
+
+### `panicle_count`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "panicle_count")$trait_description
+plot_cells(seas4, "panicle_count")
+```
+
+Similar to `panicle_volume`...
+
+### `plant_basal_tiller_number`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "plant_basal_tiller_number")$trait_description
+plot_cells(seas4, "plant_basal_tiller_number")
+```
+
+These are all done being measured before the June 1 snapshot. Perhaps the average of the values reported on the last date (May 30)?
+
+```{r fig.width=13.6, fig.height=8}
+feat <- seas4 %>%
+  filter(trait == "plant_basal_tiller_number" & as.Date(trans_date) == "2017-05-31") %>%
+  group_by(sitename2) %>%
+  summarise(
+    plant_basal_tiller_number = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `stem_elongated_internodes_number`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "stem_elongated_internodes_number")$trait_description
+plot_cells(seas4, "stem_elongated_internodes_number")
+```
+
+These seem pretty consistent across cells. Perhaps the slope of the most recent 20-ish observations would be a good feature at each time point.
+
+```{r warning=FALSE}
+get_feat <- function(trait, date) {
+  varname <- paste0(trait, "_slope")
+  getslope <- function(x, y)
+    coef(MASS::rlm(y ~ x))[2]
+  seas4 %>%
+    filter(trait == !!trait & trans_date <= !!date & trans_date >= !!date - 30) %>%
+    group_by(sitename2) %>%
+    summarise(
+      !!varname := ifelse(n() > 8, getslope(as.numeric(as.Date(trans_date)), mean), NA)
+    )
+}
+
+feat1 <- get_feat("stem_elongated_internodes_number", as.Date("2017-06-01"))
+feat2 <- get_feat("stem_elongated_internodes_number", as.Date("2017-07-01"))
+
+mldat1 <- left_join(mldat1, feat1, by = "sitename2")
+mldat2 <- left_join(mldat2, feat2, by = "sitename2")
+```
+
+### `canopy_cover`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "canopy_cover")$trait_description
+plot_cells(seas4, "canopy_cover")
+```
+
+This changes a lot over time, but appears to be consistently measured right on May 25. Perhaps the average measurement on May 25 would be a good feature.
+
+```{r fig.width=13.6, fig.height=8}
+feat <- seas4 %>%
+  filter(trait == "canopy_cover" & as.Date(trans_date) == "2017-05-25") %>%
+  group_by(sitename2) %>%
+  summarise(
+    canopy_cover = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+
+### `stand_count`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "stand_count")$trait_description
+plot_cells(seas4, "stand_count")
+```
+
+It is measured at most on one date per cell, but there can be some pretty large discrepancies in the value based on direction. Use simple average as a feature.
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "stand_count")$trans_date)),
+  ylab = "number of stand count measurements")
+```
+
+```{r fig.width=13.6, fig.height=8}
+feat <- seas4 %>%
+  filter(trait == "stand_count" & as.Date(trans_date) <= "2017-06-01") %>%
+  group_by(sitename2) %>%
+  summarise(
+    stand_count = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `stalk_diameter_minor_axis`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "stalk_diameter_minor_axis")$trait_description
+plot_cells(seas4, "stalk_diameter_minor_axis")
+```
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "stalk_diameter_minor_axis")$trans_date)),
+  ylab = "number of stalk_diameter_minor_axis measurements")
+```
+
+All values measured on June 1. Use average as feature.
+
+```{r fig.width=13.6, fig.height=8}
+feat <- seas4 %>%
+  filter(trait == "stalk_diameter_minor_axis" & as.Date(trans_date) <= "2017-06-01") %>%
+  group_by(sitename2) %>%
+  summarise(stalk_diameter_minor_axis = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `stalk_diameter_major_axis`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "stalk_diameter_major_axis")$trait_description
+plot_cells(seas4, "stalk_diameter_major_axis")
+```
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "stalk_diameter_major_axis")$trans_date)),
+  ylab = "number of stalk_diameter_major_axis measurements")
+```
+
+Same here
+
+```{r fig.width=13.6, fig.height=8}
+feat <- seas4 %>%
+  filter(trait == "stalk_diameter_major_axis" & as.Date(trans_date) <= "2017-06-01") %>%
+  group_by(sitename2) %>%
+  summarise(
+    stalk_diameter_major_axis = mean(mean))
+
+mldat1 <- left_join(mldat1, feat, by = "sitename2")
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `leaf_width`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_width")$trait_description
+plot_cells(seas4, "leaf_width")
+```
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "leaf_width")$trans_date)),
+  ylab = "number of leaf_width measurements")
+```
+
+Use June 1 average for first snapshot feature. Use June 14 average for second snapshot feature.
+
+```{r fig.width=13.6, fig.height=8}
+get_feat <- function(trait, date) {
+  seas4 %>%
+    filter(trait == !!trait & as.Date(trans_date) <= !!date) %>%
+    group_by(sitename2) %>%
+    summarise(
+      !!trait := mean(mean))
+}
+
+feat1 <- get_feat("leaf_width", "2017-06-01")
+feat2 <- get_feat("leaf_width", "2017-07-01")
+
+mldat1 <- left_join(mldat1, feat1, by = "sitename2")
+mldat2 <- left_join(mldat2, feat2, by = "sitename2")
+```
+
+
+### `leaf_length`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_length")$trait_description
+plot_cells(seas4, "leaf_length")
+```
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "leaf_length")$trans_date)),
+  ylab = "number of leaf_length measurements")
+```
+
+Same here.
+
+```{r}
+feat1 <- get_feat("leaf_length", "2017-06-01")
+feat2 <- get_feat("leaf_length", "2017-07-01")
+
+mldat1 <- left_join(mldat1, feat1, by = "sitename2")
+mldat2 <- left_join(mldat2, feat2, by = "sitename2")
+```
+
+### `leaf_desiccation_present`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_desiccation_present")$trait_description
+plot_cells(seas4, "leaf_desiccation_present")
+```
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "leaf_desiccation_present")$trans_date)),
+  ylab = "number of leaf_desiccation_present measurements")
+```
+
+No feature for June 1. Average for July 1.
+
+```{r}
+feat <- seas4 %>%
+  filter(trait == "leaf_desiccation_present" & as.Date(trans_date) <= "2017-07-01") %>%
+  group_by(sitename2) %>%
+  summarise(
+    leaf_desiccation_present = mean(mean))
+
+mldat2 <- left_join(mldat2, feat, by = "sitename2")
+```
+
+### `panicle_height`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "panicle_height")$trait_description
+plot_cells(seas4, "panicle_height")
+```
+
+Maybe not enough data to be a reliable feature?
+
+### `leaf_temperature`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_temperature")$trait_description
+plot_cells(seas4, "leaf_temperature")
+```
+
+Ignore for now...
+
+### `leaf_stomatal_conductance`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "leaf_stomatal_conductance")$trait_description
+plot_cells(seas4, "leaf_stomatal_conductance")
+```
+
+<!--
+```{r eval=FALSE, echo=FALSE}
+tmp <- filter(seas4, trait == "leaf_stomatal_conductance" & sitename2 == "MAC Field Scanner Season 4 Range 40 Column 15")
+ggplot(tmp[1:20,], aes(trans_date, mean)) + geom_point() + theme_bw()
+```
+-->
+
+Ignore this one for now...
+
+### `lodging_present`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "lodging_present")$trait_description
+plot_cells(seas4, "lodging_present")
+```
+
+Use average for both periods.
+
+### `stalk_diameter_fixed_height`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "stalk_diameter_fixed_height")$trait_description
+plot_cells(seas4, "stalk_diameter_fixed_height")
+```
+
+There is a lot of variability in measurement here... Ignore for now.
+
+```{r}
+plot(table(as.Date(filter(seas4, trait == "stalk_diameter_fixed_height")$trans_date)),
+  ylab = "number of stalk_diameter_fixed_height measurements")
+```
+
+This is all measured after July 1, so we won't include it in either snapshot.
+
+### `grain_stage_time`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "grain_stage_time")$trait_description
+plot_cells(seas4, "grain_stage_time")
+```
+
+All are measured after July 1.
+
+```{r}
+unique(filter(seas4, trait == "grain_stage_time")$trans_date) 
+```
+
+### `flowering_time`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "flowering_time")$trait_description
+plot_cells(seas4, "flowering_time")
+```
+
+Same as `grain_stage_time`.
+
+### `flag_leaf_emergence_time`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "flag_leaf_emergence_time")$trait_description
+plot_cells(seas4, "flag_leaf_emergence_time")
+```
+
+Same as `grain_stage_time`. If this and the past two variables turn out to be important from a domain expertise point of view, we can make another late-July snapshot and include them to see how they contribute to predicting biomass.
+
+### `harvest_lodging_rating`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "harvest_lodging_rating")$trait_description
+plot_cells(seas4, "harvest_lodging_rating")
+```
+
+Measured in September.
+
+### `aboveground_dry_biomass`
+
+```{r fig.width=13.6, fig.height=8}
+filter(traits, trait == "aboveground_dry_biomass")$trait_description
+plot_cells(seas4, "aboveground_dry_biomass")
+```
+
+This is the outcome variable we are interested in. It is just a single value for each cell.
+
+```{r}
+outcome <- seas4 %>%
+  filter(trait == "aboveground_dry_biomass") %>%
+  mutate(aboveground_dry_biomass = mean) %>%
+  select(sitename2, aboveground_dry_biomass)
+
+mldat1 <- left_join(mldat1, outcome, by = "sitename2")
+mldat2 <- left_join(mldat2, outcome, by = "sitename2")
+```
+
+This is the final thing we need to add to our ML datasets!
+
+```{r}
+readr::write_csv(mldat1, path = "data/mldat_june1.csv")
+readr::write_csv(mldat2, path = "data/mldat_july1.csv")
+```
+
+<!--
+Hand-measured Traits
+Note that we have ignored all of the 
+-->

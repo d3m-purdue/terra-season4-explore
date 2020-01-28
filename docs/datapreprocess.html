@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data Preprocessing</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">terra</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="datapreprocess.html">Preprocessing</a>
+</li>
+<li>
+  <a href="exploratory.html">Exploratory</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Data Preprocessing</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-01-25
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>terra2/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200123code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200123)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200123code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200123)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongd60e687"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> d60e687 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongd60e687" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    data/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/datapreprocess.Rmd
+    Untracked:  analysis/exploratory.Rmd
+    Untracked:  analysis/style.css
+    Untracked:  code/code.R
+    Untracked:  code/dataprep.R
+    Untracked:  data/raw/
+    Untracked:  data/seas4.Rdata
+
+Unstaged changes:
+    Modified:   analysis/_site.yml
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<p>The TERRA season 4 data comes as a large R data frame. There is a lot to sort out about the data prior to exploration.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">load</span>(<span class="st">&quot;data/raw/season4date.Rdata&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">seas4 &lt;-<span class="st"> </span>season_<span class="dv">4</span>_date</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw">glimpse</span>(seas4)</a></code></pre></div>
+<pre><code>Observations: 372,363
+Variables: 39
+$ checked           &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ result_type       &lt;chr&gt; &quot;traits&quot;, &quot;traits&quot;, &quot;traits&quot;, &quot;traits&quot;, &quot;traits&quot;, &quot;…
+$ id                &lt;dbl&gt; 6004764469, 6004764470, 6004764471, 6004764473, 600…
+$ citation_id       &lt;dbl&gt; 6e+09, 6e+09, 6e+09, 6e+09, 6e+09, 6e+09, 6e+09, 6e…
+$ site_id           &lt;dbl&gt; 6000005565, 6000005562, 6000005559, 6000005553, 600…
+$ treatment_id      &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ sitename          &lt;chr&gt; &quot;MAC Field Scanner Season 4 Range 8 Column 8&quot;, &quot;MAC…
+$ city              &lt;chr&gt; &quot;Maricopa&quot;, &quot;Maricopa&quot;, &quot;Maricopa&quot;, &quot;Maricopa&quot;, &quot;Ma…
+$ lat               &lt;dbl&gt; 33.07480, 33.07480, 33.07480, 33.07480, 33.07484, 3…
+$ lon               &lt;dbl&gt; -111.9749, -111.9749, -111.9749, -111.9749, -111.97…
+$ scientificname    &lt;chr&gt; &quot;Sorghum bicolor&quot;, &quot;Sorghum bicolor&quot;, &quot;Sorghum bico…
+$ commonname        &lt;chr&gt; &quot;sorghum&quot;, &quot;sorghum&quot;, &quot;sorghum&quot;, &quot;sorghum&quot;, &quot;sorghu…
+$ genus             &lt;chr&gt; &quot;Sorghum&quot;, &quot;Sorghum&quot;, &quot;Sorghum&quot;, &quot;Sorghum&quot;, &quot;Sorghu…
+$ species_id        &lt;int&gt; 2588, 2588, 2588, 2588, 2588, 2588, 2588, 2588, 258…
+$ cultivar_id       &lt;dbl&gt; 6000000961, 6000000577, 6000000850, 6000000815, 600…
+$ author            &lt;chr&gt; &quot;Zongyang, Li&quot;, &quot;Zongyang, Li&quot;, &quot;Zongyang, Li&quot;, &quot;Zo…
+$ citation_year     &lt;int&gt; 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 201…
+$ treatment         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ date              &lt;chr&gt; &quot;2017 May 8&quot;, &quot;2017 May 8&quot;, &quot;2017 May 8&quot;, &quot;2017 May…
+$ time              &lt;chr&gt; &quot;12:00:00 (America/Phoenix)&quot;, &quot;12:00:00 (America/Ph…
+$ raw_date          &lt;chr&gt; &quot;2017-05-08 14:00:00 -0500&quot;, &quot;2017-05-08 14:00:00 -…
+$ month             &lt;int&gt; 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, …
+$ year              &lt;int&gt; 2017, 2017, 2017, 2017, 2017, 2017, 2017, 2017, 201…
+$ dateloc           &lt;chr&gt; &quot;5.0&quot;, &quot;5.0&quot;, &quot;5.0&quot;, &quot;5.0&quot;, &quot;5.0&quot;, &quot;5.0&quot;, &quot;5.0&quot;, &quot;5…
+$ trait             &lt;chr&gt; &quot;canopy_height&quot;, &quot;canopy_height&quot;, &quot;canopy_height&quot;, …
+$ trait_description &lt;chr&gt; &quot;top of the general canopy of the plant, discountin…
+$ mean              &lt;dbl&gt; 13, 14, 12, 13, 14, 14, 12, 12, 14, 14, 14, 15, 14,…
+$ units             &lt;chr&gt; &quot;cm&quot;, &quot;cm&quot;, &quot;cm&quot;, &quot;cm&quot;, &quot;cm&quot;, &quot;cm&quot;, &quot;cm&quot;, &quot;cm&quot;, &quot;cm…
+$ n                 &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ statname          &lt;chr&gt; &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;,…
+$ stat              &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ notes             &lt;chr&gt; &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;,…
+$ access_level      &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, …
+$ cultivar          &lt;chr&gt; &quot;PI570145&quot;, &quot;PI329510&quot;, &quot;PI510757&quot;, &quot;PI329865&quot;, &quot;PI…
+$ entity            &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ method_name       &lt;chr&gt; &quot;3D scanner to 98th quantile height&quot;, &quot;3D scanner t…
+$ view_url          &lt;chr&gt; &quot;https://terraref.ncsa.illinois.edu/bety/traits/600…
+$ edit_url          &lt;chr&gt; &quot;https://terraref.ncsa.illinois.edu/bety/traits/600…
+$ trans_date        &lt;dttm&gt; 2017-05-08 12:00:00, 2017-05-08 12:00:00, 2017-05-…</code></pre>
+<p>We see that the data is provided in “long” format, with each row corresponding to one measurement of one variable at one time point..</p>
+<p>The key variables here are <code>trait</code>, which indicates the variable being measured, with its value reported by <code>mean</code>, and the associated date/time at which it is recorded indicated by <code>trans_date</code>.</p>
+<p>There are several other variables and a good start would be to figure out which ones we really need, so that we are working with a leaner dataset.</p>
+<div id="pruning-variables" class="section level2">
+<h2>Pruning variables</h2>
+<p>Many variables have only one or a handful of unique values.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">n_unique &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">sapply</span>(seas4, <span class="cf">function</span>(a) <span class="kw">length</span>(<span class="kw">unique</span>(a))))</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">n_unique</a></code></pre></div>
+<pre><code>          checked       result_type              city    scientificname 
+                1                 1                 1                 1 
+       commonname             genus        species_id              year 
+                1                 1                 1                 1 
+          dateloc                 n          statname              stat 
+                1                 1                 1                 1 
+     access_level       citation_id      treatment_id            author 
+                2                 3                 3                 3 
+    citation_year         treatment             month             units 
+                3                 3                 6                17 
+      method_name trait_description             trait              date 
+               28                71                77               150 
+      cultivar_id          cultivar             notes            entity 
+              351               351              1092              1270 
+             time           site_id          sitename               lat 
+             1516              2247              2247              2247 
+              lon          raw_date        trans_date              mean 
+             2247              3152              3152            150141 
+               id          view_url          edit_url 
+           244709            244709            244709 </code></pre>
+<p>Focusing on the variables with only one unique value:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">select</span>(seas4, <span class="kw">one_of</span>(<span class="kw">names</span>(n_unique)[n_unique <span class="op">==</span><span class="st"> </span><span class="dv">1</span>])) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  </span><span class="kw">head</span>(<span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="st">  </span><span class="kw">t</span>()</a></code></pre></div>
+<pre><code>               [,1]             
+checked        &quot;0&quot;              
+result_type    &quot;traits&quot;         
+city           &quot;Maricopa&quot;       
+scientificname &quot;Sorghum bicolor&quot;
+commonname     &quot;sorghum&quot;        
+genus          &quot;Sorghum&quot;        
+species_id     &quot;2588&quot;           
+year           &quot;2017&quot;           
+dateloc        &quot;5.0&quot;            
+n              NA               
+statname       &quot;&quot;               
+stat           NA               </code></pre>
+<p>Now that we have noted what these variables contain, we can remove them from the data. We’ll build up a list of variables to remove.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">ignore_vars &lt;-<span class="st"> </span><span class="kw">names</span>(n_unique)[n_unique <span class="op">==</span><span class="st"> </span><span class="dv">1</span>]</a></code></pre></div>
+<p>The access level and citation variables also look like they can be ignored. If for some reason later we determine they are needed, we can add them back in.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">unique</span>(seas4<span class="op">$</span>access_level)</a></code></pre></div>
+<pre><code>[1] 2 4</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">unique</span>(seas4<span class="op">$</span>citation_id)</a></code></pre></div>
+<pre><code>[1] 6e+09 6e+09    NA</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="kw">unique</span>(seas4<span class="op">$</span>author)</a></code></pre></div>
+<pre><code>[1] &quot;Zongyang, Li&quot;   &quot;Newcomb, Maria&quot; NA              </code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">unique</span>(seas4<span class="op">$</span>citation_year)</a></code></pre></div>
+<pre><code>[1] 2016 2017   NA</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">ignore_vars &lt;-<span class="st"> </span><span class="kw">c</span>(ignore_vars,</a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">  <span class="st">&quot;access_level&quot;</span>, <span class="st">&quot;citation_id&quot;</span>, <span class="st">&quot;author&quot;</span>, <span class="st">&quot;citation_year&quot;</span>)</a></code></pre></div>
+<p>There are some redundant date variables.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">head</span>(seas4<span class="op">$</span>trans_date)</a></code></pre></div>
+<pre><code>[1] &quot;2017-05-08 12:00:00 MST&quot; &quot;2017-05-08 12:00:00 MST&quot;
+[3] &quot;2017-05-08 12:00:00 MST&quot; &quot;2017-05-08 12:00:00 MST&quot;
+[5] &quot;2017-05-08 12:00:00 MST&quot; &quot;2017-05-08 12:00:00 MST&quot;</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">head</span>(seas4<span class="op">$</span>date)</a></code></pre></div>
+<pre><code>[1] &quot;2017 May 8&quot; &quot;2017 May 8&quot; &quot;2017 May 8&quot; &quot;2017 May 8&quot; &quot;2017 May 8&quot;
+[6] &quot;2017 May 8&quot;</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">head</span>(seas4<span class="op">$</span>time)</a></code></pre></div>
+<pre><code>[1] &quot;12:00:00 (America/Phoenix)&quot; &quot;12:00:00 (America/Phoenix)&quot;
+[3] &quot;12:00:00 (America/Phoenix)&quot; &quot;12:00:00 (America/Phoenix)&quot;
+[5] &quot;12:00:00 (America/Phoenix)&quot; &quot;12:00:00 (America/Phoenix)&quot;</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="kw">all</span>(<span class="kw">as.integer</span>(<span class="kw">format</span>(seas4<span class="op">$</span>trans_date, <span class="st">&quot;%m&quot;</span>)) <span class="op">==</span><span class="st"> </span>seas4<span class="op">$</span>month)</a></code></pre></div>
+<pre><code>[1] TRUE</code></pre>
+<p>The <code>trans_date</code> variable contains all the information found in <code>date</code>, <code>time</code>, and <code>month</code>, so we can remove those.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1">ignore_vars &lt;-<span class="st"> </span><span class="kw">c</span>(ignore_vars, <span class="st">&quot;date&quot;</span>, <span class="st">&quot;time&quot;</span>, <span class="st">&quot;month&quot;</span>)</a></code></pre></div>
+<p>The <code>view_url</code> and <code>edit_url</code> variables are easy to reconstruct with the <code>id</code> variable so they can be removed.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">head</span>(seas4<span class="op">$</span>id)</a></code></pre></div>
+<pre><code>[1] 6004764469 6004764470 6004764471 6004764473 6004764478 6004764479</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="kw">head</span>(seas4<span class="op">$</span>view_url)</a></code></pre></div>
+<pre><code>[1] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764469&quot;
+[2] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764470&quot;
+[3] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764471&quot;
+[4] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764473&quot;
+[5] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764478&quot;
+[6] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764479&quot;</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">head</span>(seas4<span class="op">$</span>edit_url)</a></code></pre></div>
+<pre><code>[1] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764469/edit&quot;
+[2] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764470/edit&quot;
+[3] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764471/edit&quot;
+[4] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764473/edit&quot;
+[5] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764478/edit&quot;
+[6] &quot;https://terraref.ncsa.illinois.edu/bety/traits/6004764479/edit&quot;</code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">ignore_vars &lt;-<span class="st"> </span><span class="kw">c</span>(ignore_vars, <span class="st">&quot;view_url&quot;</span>, <span class="st">&quot;edit_url&quot;</span>)</a></code></pre></div>
+<p>There are a number of groups of variables that have redundancies that we can handle by creating lookup tables.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1">traits &lt;-<span class="st"> </span><span class="kw">select</span>(seas4, trait, trait_description) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a>
+<a class="sourceLine" id="cb33-2" data-line-number="2">treatments &lt;-<span class="st"> </span><span class="kw">select</span>(seas4, treatment_id, treatment) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a>
+<a class="sourceLine" id="cb33-3" data-line-number="3">cultivars &lt;-<span class="st"> </span><span class="kw">select</span>(seas4, cultivar, cultivar_id) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a>
+<a class="sourceLine" id="cb33-4" data-line-number="4">sites &lt;-<span class="st"> </span><span class="kw">select</span>(seas4, site_id, sitename, lat, lon) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a>
+<a class="sourceLine" id="cb33-5" data-line-number="5"><span class="co"># pull out range, column, and direction from sites as new variables</span></a>
+<a class="sourceLine" id="cb33-6" data-line-number="6">tmp &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;MAC Field Scanner Season 4 &quot;</span>, <span class="st">&quot;&quot;</span>, sites<span class="op">$</span>sitename)</a>
+<a class="sourceLine" id="cb33-7" data-line-number="7">sites<span class="op">$</span>range &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="kw">gsub</span>(<span class="st">&quot;Range ([0-9]+).*&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">1&quot;</span>, tmp))</a>
+<a class="sourceLine" id="cb33-8" data-line-number="8">sites<span class="op">$</span>column &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="kw">gsub</span>(<span class="st">&quot;.*Column ([0-9]+).*&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">1&quot;</span>, tmp))</a>
+<a class="sourceLine" id="cb33-9" data-line-number="9">sites<span class="op">$</span>dir &lt;-<span class="st"> </span><span class="kw">trimws</span>(<span class="kw">gsub</span>(<span class="st">&quot;.*Column [0-9]+(.*)&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">1&quot;</span>, tmp))</a>
+<a class="sourceLine" id="cb33-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb33-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb33-12" data-line-number="12">traits</a></code></pre></div>
+<pre><code># A tibble: 77 x 2
+   trait               trait_description                                        
+   &lt;chr&gt;               &lt;chr&gt;                                                    
+ 1 canopy_height       &quot;top of the general canopy of the plant, discounting any…
+ 2 leaf_temperature    &quot;temperature of the surface of a sunlit leaf&quot;            
+ 3 panicle_count       &quot;&quot;                                                       
+ 4 panicle_volume      &quot;&quot;                                                       
+ 5 panicle_surface_ar… &quot;&quot;                                                       
+ 6 leaf_desiccation_p… &quot;Presence or absence of leaves showing desiccation. 1 = …
+ 7 lodging_present     &quot;Plant lodging: presence or absence of lodging or severe…
+ 8 absorbance_530      &quot;Absorbance at 530 nm&quot;                                   
+ 9 absorbance_605      &quot;Absorbance at 605 nm&quot;                                   
+10 absorbance_730      &quot;Absorbance at 730 nm&quot;                                   
+# … with 67 more rows</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1">treatments</a></code></pre></div>
+<pre><code># A tibble: 3 x 2
+  treatment_id treatment                               
+         &lt;dbl&gt; &lt;chr&gt;                                   
+1           NA &lt;NA&gt;                                    
+2   6000000024 BAP 2017, water-deficit stress Aug 1-14 
+3   6000000026 BAP 2017, water-deficit stress Aug 15-30</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1">cultivars</a></code></pre></div>
+<pre><code># A tibble: 351 x 2
+   cultivar cultivar_id
+   &lt;chr&gt;          &lt;dbl&gt;
+ 1 PI570145  6000000961
+ 2 PI329510  6000000577
+ 3 PI510757  6000000850
+ 4 PI329865  6000000815
+ 5 PI569457  6000000935
+ 6 PI521152  6000000855
+ 7 PI569452  6000000931
+ 8 PI585961  6000000982
+ 9 PI570431  6000000968
+10 PI257600  6000000751
+# … with 341 more rows</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1">sites</a></code></pre></div>
+<pre><code># A tibble: 2,247 x 7
+      site_id sitename                              lat   lon range column dir  
+        &lt;dbl&gt; &lt;chr&gt;                               &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;  &lt;int&gt; &lt;chr&gt;
+ 1 6000005565 MAC Field Scanner Season 4 Range 8…  33.1 -112.     8      8 &quot;&quot;   
+ 2 6000005562 MAC Field Scanner Season 4 Range 8…  33.1 -112.     8      9 &quot;&quot;   
+ 3 6000005559 MAC Field Scanner Season 4 Range 8…  33.1 -112.     8     10 &quot;&quot;   
+ 4 6000005553 MAC Field Scanner Season 4 Range 8…  33.1 -112.     8     12 &quot;&quot;   
+ 5 6000005588 MAC Field Scanner Season 4 Range 9…  33.1 -112.     9      3 &quot;&quot;   
+ 6 6000005591 MAC Field Scanner Season 4 Range 9…  33.1 -112.     9      4 &quot;&quot;   
+ 7 6000005252 MAC Field Scanner Season 4 Range 9…  33.1 -112.     9      5 &quot;&quot;   
+ 8 6000005253 MAC Field Scanner Season 4 Range 9…  33.1 -112.     9      7 &quot;&quot;   
+ 9 6000005603 MAC Field Scanner Season 4 Range 9…  33.1 -112.     9     11 &quot;&quot;   
+10 6000005606 MAC Field Scanner Season 4 Range 9…  33.1 -112.     9     12 &quot;&quot;   
+# … with 2,237 more rows</code></pre>
+<p>With these lookup tables, we can remove some of the redundant variables:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1">ignore_vars &lt;-<span class="st"> </span><span class="kw">c</span>(ignore_vars,</a>
+<a class="sourceLine" id="cb41-2" data-line-number="2">  <span class="st">&quot;trait_description&quot;</span>, <span class="st">&quot;treatment&quot;</span>, <span class="st">&quot;cultivar_id&quot;</span>, <span class="st">&quot;site_id&quot;</span>)</a></code></pre></div>
+<p>We now have 25 variables we can remove from the data:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1">ignore_vars</a></code></pre></div>
+<pre><code> [1] &quot;checked&quot;           &quot;result_type&quot;       &quot;city&quot;             
+ [4] &quot;scientificname&quot;    &quot;commonname&quot;        &quot;genus&quot;            
+ [7] &quot;species_id&quot;        &quot;year&quot;              &quot;dateloc&quot;          
+[10] &quot;n&quot;                 &quot;statname&quot;          &quot;stat&quot;             
+[13] &quot;access_level&quot;      &quot;citation_id&quot;       &quot;author&quot;           
+[16] &quot;citation_year&quot;     &quot;date&quot;              &quot;time&quot;             
+[19] &quot;month&quot;             &quot;view_url&quot;          &quot;edit_url&quot;         
+[22] &quot;trait_description&quot; &quot;treatment&quot;         &quot;cultivar_id&quot;      
+[25] &quot;site_id&quot;          </code></pre>
+<p>Let’s remove them.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1">seas4 &lt;-<span class="st"> </span><span class="kw">select</span>(seas4, <span class="kw">one_of</span>(<span class="kw">setdiff</span>(<span class="kw">names</span>(seas4), ignore_vars)))</a></code></pre></div>
+</div>
+<div id="duplicates" class="section level2">
+<h2>Duplicates</h2>
+<p>There are duplicates present in the data that need to be removed. First, there are several <code>id</code>s that appear more than once in the data.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" data-line-number="1">seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by</span>(id) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-3" data-line-number="3"><span class="st">  </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-4" data-line-number="4"><span class="st">  </span><span class="kw">filter</span>(n <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb45-5" data-line-number="5"><span class="st">  </span><span class="kw">arrange</span>(<span class="op">-</span>n)</a></code></pre></div>
+<pre><code># A tibble: 99,790 x 2
+           id     n
+        &lt;dbl&gt; &lt;int&gt;
+ 1 6001938532     4
+ 2 6001939975     4
+ 3 6001940820     4
+ 4 6001940821     4
+ 5 6001940823     4
+ 6 6001940824     4
+ 7 6001940825     4
+ 8 6001940828     4
+ 9 6001940829     4
+10 6001940836     4
+# … with 99,780 more rows</code></pre>
+<p>Let’s look at one of these:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" data-line-number="1"><span class="kw">filter</span>(seas4, id <span class="op">==</span><span class="st"> </span><span class="dv">6001938532</span>)</a></code></pre></div>
+<pre><code># A tibble: 4 x 14
+      id treatment_id sitename   lat   lon raw_date trait  mean units notes
+   &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+1 6.00e9   6000000024 MAC Fie…  33.1 -112. 2017-07… cano…   111 cm    &quot;&quot;   
+2 6.00e9   6000000024 MAC Fie…  33.1 -112. 2017-07… cano…   111 cm    &quot;&quot;   
+3 6.00e9   6000000024 MAC Fie…  33.1 -112. 2017-07… cano…   111 cm    &quot;&quot;   
+4 6.00e9   6000000024 MAC Fie…  33.1 -112. 2017-07… cano…   111 cm    &quot;&quot;   
+# … with 4 more variables: cultivar &lt;chr&gt;, entity &lt;chr&gt;, method_name &lt;chr&gt;,
+#   trans_date &lt;dttm&gt;</code></pre>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" data-line-number="1"><span class="kw">filter</span>(seas4, id <span class="op">==</span><span class="st"> </span><span class="dv">6001938532</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a></code></pre></div>
+<pre><code># A tibble: 1 x 14
+      id treatment_id sitename   lat   lon raw_date trait  mean units notes
+   &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+1 6.00e9   6000000024 MAC Fie…  33.1 -112. 2017-07… cano…   111 cm    &quot;&quot;   
+# … with 4 more variables: cultivar &lt;chr&gt;, entity &lt;chr&gt;, method_name &lt;chr&gt;,
+#   trans_date &lt;dttm&gt;</code></pre>
+<p>It is the exact same data for every duplicate entry. I’m not sure why these are in the data, but it makes sense to only keep distinct rows of the data:</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" data-line-number="1">seas4 &lt;-<span class="st"> </span><span class="kw">distinct</span>(seas4)</a>
+<a class="sourceLine" id="cb51-2" data-line-number="2">seas4</a></code></pre></div>
+<pre><code># A tibble: 244,709 x 14
+       id treatment_id sitename   lat   lon raw_date trait  mean units notes
+    &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    13 cm    &quot;&quot;   
+ 2 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+ 3 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    12 cm    &quot;&quot;   
+ 4 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    13 cm    &quot;&quot;   
+ 5 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+ 6 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+ 7 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    12 cm    &quot;&quot;   
+ 8 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    12 cm    &quot;&quot;   
+ 9 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+10 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+# … with 244,699 more rows, and 4 more variables: cultivar &lt;chr&gt;, entity &lt;chr&gt;,
+#   method_name &lt;chr&gt;, trans_date &lt;dttm&gt;</code></pre>
+<p>We now have 244709 rows of data vs. the original 372363 rows.</p>
+<p>Even after this, there are more duplicates, where there are repeats of rows if the <code>id</code> variable is ignored.</p>
+<p>For example, for one particular site, trait, and date:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" data-line-number="1">tmp &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb53-2" data-line-number="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">date =</span> <span class="kw">as.Date</span>(trans_date)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb53-3" data-line-number="3"><span class="st">  </span><span class="kw">filter</span>(sitename <span class="op">==</span><span class="st"> &quot;MAC Field Scanner Season 4 Range 10 Column 1&quot;</span> <span class="op">&amp;</span></a>
+<a class="sourceLine" id="cb53-4" data-line-number="4"><span class="st">    </span>date <span class="op">==</span><span class="st"> &quot;2017-07-18&quot;</span> <span class="op">&amp;</span></a>
+<a class="sourceLine" id="cb53-5" data-line-number="5"><span class="st">    </span>trait <span class="op">==</span><span class="st"> &quot;surface_temperature&quot;</span>)</a>
+<a class="sourceLine" id="cb53-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb53-7" data-line-number="7"><span class="kw">distinct</span>(tmp)</a></code></pre></div>
+<pre><code># A tibble: 3 x 15
+      id treatment_id sitename   lat   lon raw_date trait  mean units notes
+   &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+1 6.00e9           NA MAC Fie…  33.1 -112. 2017-07… surf…  34.4 C     &quot;&quot;   
+2 6.00e9           NA MAC Fie…  33.1 -112. 2017-07… surf…  34.4 C     &quot;&quot;   
+3 6.00e9           NA MAC Fie…  33.1 -112. 2017-07… surf…  34.4 C     &quot;&quot;   
+# … with 5 more variables: cultivar &lt;chr&gt;, entity &lt;chr&gt;, method_name &lt;chr&gt;,
+#   trans_date &lt;dttm&gt;, date &lt;date&gt;</code></pre>
+<p>The <code>id</code> is the only variable that is different for each row:</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" data-line-number="1">tmp <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>id) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a></code></pre></div>
+<pre><code># A tibble: 1 x 14
+  treatment_id sitename   lat   lon raw_date trait  mean units notes cultivar
+         &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;   
+1           NA MAC Fie…  33.1 -112. 2017-07… surf…  34.4 C     &quot;&quot;    SP1615  
+# … with 4 more variables: entity &lt;chr&gt;, method_name &lt;chr&gt;, trans_date &lt;dttm&gt;,
+#   date &lt;date&gt;</code></pre>
+<p>I don’t know why there would be a different <code>id</code> for sets of measurements where every other variable has the same value, but it makes sense to remove these from the data as well.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" data-line-number="1">seas4 &lt;-<span class="st"> </span>seas4 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb57-2" data-line-number="2"><span class="st">  </span><span class="kw">group_by_at</span>(<span class="kw">setdiff</span>(<span class="kw">names</span>(seas4), <span class="st">&quot;id&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb57-3" data-line-number="3"><span class="st">  </span><span class="kw">filter</span>(<span class="kw">row_number</span>() <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb57-4" data-line-number="4"><span class="st">  </span><span class="kw">ungroup</span>()</a>
+<a class="sourceLine" id="cb57-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb57-6" data-line-number="6">seas4</a></code></pre></div>
+<pre><code># A tibble: 223,585 x 14
+       id treatment_id sitename   lat   lon raw_date trait  mean units notes
+    &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+ 1 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    13 cm    &quot;&quot;   
+ 2 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+ 3 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    12 cm    &quot;&quot;   
+ 4 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    13 cm    &quot;&quot;   
+ 5 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+ 6 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+ 7 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    12 cm    &quot;&quot;   
+ 8 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    12 cm    &quot;&quot;   
+ 9 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+10 6.00e9           NA MAC Fie…  33.1 -112. 2017-05… cano…    14 cm    &quot;&quot;   
+# … with 223,575 more rows, and 4 more variables: cultivar &lt;chr&gt;, entity &lt;chr&gt;,
+#   method_name &lt;chr&gt;, trans_date &lt;dttm&gt;</code></pre>
+<p>We now have 223585 observations.</p>
+</div>
+<div id="sites" class="section level2">
+<h2>Sites</h2>
+<p>One more transformation to apply to the data to get it ready for exploration is to look at the <code>sitename</code>.</p>
+<p>There are many <code>sitename</code> values that are identical except for ending with a “E” and “W”. For exmaple</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" data-line-number="1"><span class="kw">filter</span>(sites,</a>
+<a class="sourceLine" id="cb59-2" data-line-number="2">  <span class="kw">grepl</span>(<span class="st">&quot;MAC Field Scanner Season 4 Range 36 Column 2&quot;</span>, sitename))</a></code></pre></div>
+<pre><code># A tibble: 3 x 7
+     site_id sitename                               lat   lon range column dir  
+       &lt;dbl&gt; &lt;chr&gt;                                &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;  &lt;int&gt; &lt;chr&gt;
+1 6000005295 MAC Field Scanner Season 4 Range 36…  33.1 -112.    36      2 &quot;&quot;   
+2 6000008066 MAC Field Scanner Season 4 Range 36…  33.1 -112.    36      2 &quot;E&quot;  
+3 6000008065 MAC Field Scanner Season 4 Range 36…  33.1 -112.    36      2 &quot;W&quot;  </code></pre>
+<p>These are important, and we will look at them in more detail in the <a href="exploratory.html">exploratory</a> section, but it is also useful to have another variable with these values removed, since they represent different measurements on the same cultivar.</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1">seas4 &lt;-<span class="st"> </span><span class="kw">mutate</span>(seas4, <span class="dt">sitename2 =</span> <span class="kw">gsub</span>(<span class="st">&quot; (E|W)$&quot;</span>, <span class="st">&quot;&quot;</span>, sitename))</a></code></pre></div>
+</div>
+<div id="saving-the-data" class="section level2">
+<h2>Saving the Data</h2>
+<p>We will now save this data for use in our other analyses:</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" data-line-number="1"><span class="kw">save</span>(seas4, traits, treatments, cultivars, sites, <span class="dt">file =</span> <span class="st">&quot;data/seas4.Rdata&quot;</span>)</a></code></pre></div>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
+<pre><code>R version 3.6.1 (2019-07-05)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Catalina 10.15.2
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.3     purrr_0.3.3    
+ [5] readr_1.3.1     tidyr_1.0.0     tibble_2.1.3    ggplot2_3.2.1  
+ [9] tidyverse_1.3.0 workflowr_1.6.0
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_0.2.5 xfun_0.12        haven_2.2.0      lattice_0.20-38 
+ [5] colorspace_1.4-1 vctrs_0.2.1      generics_0.0.2   htmltools_0.4.0 
+ [9] yaml_2.2.0       utf8_1.1.4       rlang_0.4.2      later_1.0.0     
+[13] pillar_1.4.3     withr_2.1.2      glue_1.3.1       DBI_1.0.0       
+[17] dbplyr_1.4.2     modelr_0.1.5     readxl_1.3.1     lifecycle_0.1.0 
+[21] munsell_0.5.0    gtable_0.3.0     cellranger_1.1.0 rvest_0.3.5     
+[25] evaluate_0.14    knitr_1.27       httpuv_1.5.2     fansi_0.4.1     
+[29] broom_0.5.2      Rcpp_1.0.3       promises_1.1.0   backports_1.1.5 
+[33] scales_1.1.0     jsonlite_1.6     fs_1.3.1         hms_0.5.3       
+[37] digest_0.6.23    stringi_1.4.5    grid_3.6.1       rprojroot_1.3-2 
+[41] cli_2.0.1        tools_3.6.1      magrittr_1.5     lazyeval_0.2.2  
+[45] crayon_1.3.4     pkgconfig_2.0.3  zeallot_0.1.0    xml2_1.2.2      
+[49] reprex_0.3.0     lubridate_1.7.4  rstudioapi_0.10  assertthat_0.2.1
+[53] rmarkdown_2.0    httr_1.4.1       R6_2.4.1         nlme_3.1-140    
+[57] git2r_0.26.1     compiler_3.6.1  </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
